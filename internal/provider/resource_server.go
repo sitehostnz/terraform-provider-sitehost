@@ -4,6 +4,8 @@ import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/sitehostnz/gosh"
+	"log"
 )
 
 func resourceServer() *schema.Resource {
@@ -49,7 +51,24 @@ func resourceServer() *schema.Resource {
 }
 
 func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	panic(nil)
+	client := meta.(*CombinedConfig).goshClient()
+
+	opts := &gosh.ServerCreateRequest{
+		Label:       d.Get("label").(string),
+		Location:    d.Get("location").(string),
+		ProductCode: d.Get("product_code").(string),
+		Image:       d.Get("image").(string),
+	}
+
+	response, err := client.Servers.Create(ctx, opts)
+	if err != nil {
+		return diag.Errorf("Error creating server: %s", err)
+	}
+
+	d.SetId(response.Return.Name)
+	log.Printf("[INFO] Server Name: %s", d.Id())
+
+	return nil
 }
 
 func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

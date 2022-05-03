@@ -9,6 +9,20 @@ import (
 func New(version string) func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
+			Schema: map[string]*schema.Schema{
+				"client_id": {
+					Type:        schema.TypeString,
+					Required:    true,
+					DefaultFunc: schema.EnvDefaultFunc("SH_CLIENT_ID", nil),
+					Description: "client identifier",
+				}, "apikey": {
+					Type:        schema.TypeString,
+					Required:    true,
+					DefaultFunc: schema.EnvDefaultFunc("SH_APIKEY", nil),
+					Description: "api authentication key",
+					Sensitive:   true,
+				},
+			},
 			DataSourcesMap: map[string]*schema.Resource{
 				"sitehost_server": dataSourceServer(),
 			},
@@ -17,14 +31,20 @@ func New(version string) func() *schema.Provider {
 			},
 		}
 
-		p.ConfigureContextFunc = configure(version, p)
+		p.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+			return configure(ctx, version, d)
+		}
 
 		return p
 	}
 }
 
-func configure(version string, p *schema.Provider) func(context.Context, *schema.ResourceData) (interface{}, diag.Diagnostics) {
-	return func(context.Context, *schema.ResourceData) (interface{}, diag.Diagnostics) {
-		return nil, nil
+func configure(_ context.Context, version string, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	config := Config{
+		APIKey:           d.Get("apikey").(string),
+		ClientID:         d.Get("client_id").(string),
+		TerraformVersion: version,
 	}
+
+	return config.Client(), nil
 }
