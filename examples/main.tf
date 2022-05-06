@@ -1,15 +1,16 @@
 terraform {
 	required_providers {
 		sitehost = {
-			version = "0.1.0"
+			version = "0.1.1"
 			source = "hashicorp.com/sh/sitehost"
 		}
 	}
 }
 
 provider "sitehost" {
-	client_id = "XXX"
-	apikey = "XXX"
+	client_id = ""
+	api_key = ""
+	api_endpoint = "https://api.staging.sitehost.nz/1.1/"
 }
 
 output "terra0" {
@@ -18,7 +19,7 @@ output "terra0" {
 }
 
 resource "sitehost_server" "terra0" {
-	label = "TerraForm"
+	label = "trtest"
 	location = "SHQLIN"
 	product_code = "XENPRO"
 	image = "ubuntu-xenial.amd64"

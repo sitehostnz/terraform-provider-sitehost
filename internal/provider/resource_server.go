@@ -60,12 +60,19 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		Image:       d.Get("image").(string),
 	}
 
-	response, err := client.Servers.Create(ctx, opts)
+	res, err := client.Servers.Create(ctx, opts)
 	if err != nil {
 		return diag.Errorf("Error creating server: %s", err)
 	}
 
-	d.SetId(response.Return.Name)
+	d.SetId(res.Return.Name)
+	d.Set("password", res.Return.Password)
+
+	err = waitForAction(client, res.Return.JobID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	log.Printf("[INFO] Server Name: %s", d.Id())
 
 	return nil
