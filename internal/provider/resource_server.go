@@ -66,7 +66,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	d.SetId(res.Return.Name)
-	d.Set("password", res.Return.Password)
+	d.Set("password", res.Return.Password) // test set data
 
 	err = waitForAction(client, res.Return.JobID)
 	if err != nil {
@@ -79,7 +79,20 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	panic(nil)
+	client := meta.(*CombinedConfig).goshClient()
+
+	server, err := client.Servers.Get(context.Background(), d.Id())
+
+	if err != nil {
+		return diag.Errorf("Error retrieving server: %s", err)
+	}
+
+	err = setServerAttributes(d, server)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
 func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -87,5 +100,29 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	panic(nil)
+	client := meta.(*CombinedConfig).goshClient()
+
+	resp, err := client.Servers.Delete(context.Background(), d.Id())
+
+	if err != nil {
+		return diag.Errorf("Error deleting server: %s", err)
+	}
+
+	err = waitForAction(client, resp.Return.JobID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
+}
+
+func setServerAttributes(d *schema.ResourceData, server *gosh.Server) error {
+	d.Set("name", server.Name)
+	//d.Set("ips", server.URN())
+	d.Set("label", server.Label)
+	d.Set("location", server.LocationCode)
+	d.Set("product_code", server.ProductCode)
+	d.Set("image", server.Distro)
+
+	return nil
 }
