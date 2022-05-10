@@ -13,12 +13,15 @@ provider "sitehost" {
 	api_endpoint = "https://api.staging.sitehost.nz/1.1/"
 }
 
-output "terra0" {
-	value = sitehost_server.terra0
-	sensitive = true
+output "server_ips" {
+	value = sitehost_server.web.ips
 }
 
-resource "sitehost_server" "terra0" {
+output "password" {
+	value = nonsensitive(sitehost_server.web.password)
+}
+
+resource "sitehost_server" "web" {
 	label = "trtest"
 	location = "SHQLIN"
 	product_code = "XENPRO"

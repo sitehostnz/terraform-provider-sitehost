@@ -65,8 +65,11 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.Errorf("Error creating server: %s", err)
 	}
 
+	// Set data
 	d.SetId(res.Return.Name)
-	d.Set("password", res.Return.Password) // test set data
+	d.Set("name", res.Return.Name)
+	d.Set("password", res.Return.Password)
+	d.Set("ips", res.Return.Ips)
 
 	err = waitForAction(client, res.Return.JobID)
 	if err != nil {
@@ -118,11 +121,5 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 
 func setServerAttributes(d *schema.ResourceData, server *gosh.Server) error {
 	d.Set("name", server.Name)
-	//d.Set("ips", server.URN())
-	d.Set("label", server.Label)
-	d.Set("location", server.LocationCode)
-	d.Set("product_code", server.ProductCode)
-	d.Set("image", server.Distro)
-
 	return nil
 }
