@@ -24,6 +24,6 @@ output "password" {
 resource "sitehost_server" "web" {
 	label = "trtest"
 	location = "SHQLIN"
-	product_code = "XENPRO"
+	product_code = "XENLIT"
 	image = "ubuntu-xenial.amd64"
 }

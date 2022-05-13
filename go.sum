@@ -197,6 +197,8 @@ github.com/sitehostnz/gosh v0.1.3 h1:YNK9qj+49d2e+bDGgQjqpxSr+bPt/FUmqfTbTsWQZpc
 github.com/sitehostnz/gosh v0.1.3/go.mod h1:I4W6BpNCvOQElfc0htYtR+jTdyp0TG2Wpvl57eeoeNw=
 github.com/sitehostnz/gosh v0.1.4 h1:b2kDsBJ0W8iZ7/1r/ZandnTyhqzObvooJFUm9Aqv7Ps=
 github.com/sitehostnz/gosh v0.1.4/go.mod h1:I4W6BpNCvOQElfc0htYtR+jTdyp0TG2Wpvl57eeoeNw=
+github.com/sitehostnz/gosh v0.2.0 h1:Bp8G1gC34RYgJcsyBgB0R+e3fmlFZqGSF9Ks2IBE0Hk=
+github.com/sitehostnz/gosh v0.2.0/go.mod h1:I4W6BpNCvOQElfc0htYtR+jTdyp0TG2Wpvl57eeoeNw=
 github.com/spf13/pflag v1.0.2/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

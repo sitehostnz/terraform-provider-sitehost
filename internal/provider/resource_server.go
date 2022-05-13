@@ -40,7 +40,6 @@ func resourceServer() *schema.Resource {
 			}, "product_code": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			}, "image": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -99,7 +98,27 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	panic(nil)
+	client := meta.(*CombinedConfig).goshClient()
+
+	if d.HasChange("product_code") {
+		err := client.Servers.Upgrade(context.Background(), &gosh.ServerUpgradeRequest{Name: d.Id(), Plan: d.Get("product_code").(string)})
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		resp, err := client.Servers.CommitChanges(context.Background(), d.Id())
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		err = waitForAction(client, resp.Return.JobID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		return nil
+	}
+
+	return resourceServerRead(ctx, d, meta)
 }
 
 func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
