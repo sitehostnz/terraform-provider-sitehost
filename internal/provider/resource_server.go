@@ -118,6 +118,15 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		return nil
 	}
 
+	if d.HasChange("label") {
+		err := client.Servers.Update(context.Background(), &gosh.ServerUpdateRequest{Name: d.Id(), Label: d.Get("label").(string)})
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		return nil
+	}
+
 	return resourceServerRead(ctx, d, meta)
 }
 
