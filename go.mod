@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.15.0
-	github.com/sitehostnz/gosh v0.2.1
+	github.com/sitehostnz/gosh v0.2.2
 )
 
 require (

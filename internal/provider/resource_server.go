@@ -44,6 +44,10 @@ func resourceServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+			}, "ssh_keys": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
@@ -52,11 +56,21 @@ func resourceServer() *schema.Resource {
 func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*CombinedConfig).goshClient()
 
+	keys := d.Get("ssh_keys").([]interface{})
+	var sshKeys []string
+
+	for _, key := range keys {
+		sshKeys = append(sshKeys, key.(string))
+	}
+
 	opts := &gosh.ServerCreateRequest{
 		Label:       d.Get("label").(string),
 		Location:    d.Get("location").(string),
 		ProductCode: d.Get("product_code").(string),
 		Image:       d.Get("image").(string),
+		Params: gosh.ParamsOptions{
+			SSHKeys: sshKeys,
+		},
 	}
 
 	res, err := client.Servers.Create(ctx, opts)

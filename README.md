@@ -32,7 +32,7 @@ Example Usage
 # Create a new Server in the AKLCITY region
 resource "sitehost_server" "web" {
     image  = "ubuntu-focal.amd64"
-    name   = "web-1"
+    label   = "web-1"
     location = "AKLCITY"
     product_code   = "XENLIT"
 }
