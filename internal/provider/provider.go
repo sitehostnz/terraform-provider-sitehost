@@ -2,10 +2,12 @@ package provider
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// New return a schema.Provider for SiteHost
 func New(version string) func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
@@ -43,6 +45,7 @@ func New(version string) func() *schema.Provider {
 	}
 }
 
+// configure return the Config with connection data
 func configure(_ context.Context, version string, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	config := Config{
 		APIKey:           d.Get("api_key").(string),

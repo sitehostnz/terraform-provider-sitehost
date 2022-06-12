@@ -2,10 +2,11 @@ package provider
 
 import (
 	"context"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh"
-	"log"
 )
 
 func resourceServer() *schema.Resource {
@@ -84,6 +85,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	d.Set("password", res.Return.Password)
 	d.Set("ips", res.Return.Ips)
 
+	// wait for "Completed" status
 	err = waitForAction(client, res.Return.JobID)
 	if err != nil {
 		return diag.FromErr(err)

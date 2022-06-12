@@ -8,8 +8,8 @@ terraform {
 }
 
 provider "sitehost" {
-	client_id = ""
-	api_key = ""
+	client_id = "121"
+	api_key = "2dd7ea2de9cdb6eabeece8a7fb7e5e892647d675a4b6ee1aa6c6b75f881d6b79"
 	api_endpoint = "https://api.staging.sitehost.nz/1.1/"
 }
 

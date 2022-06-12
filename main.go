@@ -6,6 +6,10 @@ import (
 	"github.com/sitehostnz/terraform-provider-sitehost/internal/provider"
 )
 
+
+// Generate the Terraform provider documentation using `tfplugindocs`:
+//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
+
 var (
 	version string = "dev"
 )
