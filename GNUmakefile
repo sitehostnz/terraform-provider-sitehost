@@ -3,7 +3,7 @@ HOSTNAME=hashicorp.com
 NAMESPACE=sh
 NAME=sitehost
 BINARY=terraform-provider-${NAME}
-VERSION=0.1.1
+VERSION=0.0.9
 OS_ARCH=linux_amd64
 
 default: install

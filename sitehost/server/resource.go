@@ -1,4 +1,4 @@
-package provider
+package server
 
 import (
 	"context"
@@ -7,55 +7,22 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
-func resourceServer() *schema.Resource {
+func Resource() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceServerCreate,
-		ReadContext:   resourceServerRead,
-		UpdateContext: resourceServerUpdate,
-		DeleteContext: resourceServerDelete,
+		CreateContext: createResource,
+		ReadContext:   readResource,
+		UpdateContext: updateResource,
+		DeleteContext: deleteResource,
 
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			}, "password": {
-				Type:      schema.TypeString,
-				Sensitive: true,
-				Computed:  true,
-			}, "ips": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			}, "label": {
-				Type:     schema.TypeString,
-				Required: true,
-			}, "location": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			}, "product_code": {
-				Type:     schema.TypeString,
-				Required: true,
-			}, "image": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			}, "ssh_keys": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
-		},
+		Schema: resourceSchema,
 	}
 }
 
-func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*CombinedConfig).goshClient()
+func createResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*helper.CombinedConfig).Client
 
 	keys := d.Get("ssh_keys").([]interface{})
 	var sshKeys []string
@@ -86,7 +53,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	d.Set("ips", res.Return.Ips)
 
 	// wait for "Completed" status
-	err = waitForAction(client, res.Return.JobID)
+	err = helper.WaitForAction(client, res.Return.JobID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -96,8 +63,8 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
-func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*CombinedConfig).goshClient()
+func readResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*helper.CombinedConfig).Client
 
 	server, err := client.Servers.Get(context.Background(), d.Id())
 
@@ -113,8 +80,8 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 	return nil
 }
 
-func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*CombinedConfig).goshClient()
+func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*helper.CombinedConfig).Client
 
 	if d.HasChange("product_code") {
 		err := client.Servers.Upgrade(context.Background(), &gosh.ServerUpgradeRequest{Name: d.Id(), Plan: d.Get("product_code").(string)})
@@ -126,7 +93,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			return diag.FromErr(err)
 		}
 
-		err = waitForAction(client, resp.Return.JobID)
+		err = helper.WaitForAction(client, resp.Return.JobID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -143,11 +110,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		return nil
 	}
 
-	return resourceServerRead(ctx, d, meta)
+	return readResource(ctx, d, meta)
 }
 
-func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*CombinedConfig).goshClient()
+func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*helper.CombinedConfig).Client
 
 	resp, err := client.Servers.Delete(context.Background(), d.Id())
 
@@ -155,7 +122,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.Errorf("Error deleting server: %s", err)
 	}
 
-	err = waitForAction(client, resp.Return.JobID)
+	err = helper.WaitForAction(client, resp.Return.JobID)
 	if err != nil {
 		return diag.FromErr(err)
 	}

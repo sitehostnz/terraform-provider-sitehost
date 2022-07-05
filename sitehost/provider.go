@@ -1,10 +1,12 @@
-package provider
+package sitehost
 
 import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server"
 )
 
 // New return a schema.Provider for SiteHost
@@ -16,24 +18,24 @@ func New(version string) func() *schema.Provider {
 					Type:        schema.TypeString,
 					Required:    true,
 					DefaultFunc: schema.EnvDefaultFunc("SH_CLIENT_ID", nil),
-					Description: "client identifier",
+					Description: "The client identifier that allows you access to your SiteHost account.",
 				}, "api_key": {
 					Type:        schema.TypeString,
 					Required:    true,
 					DefaultFunc: schema.EnvDefaultFunc("SH_APIKEY", nil),
-					Description: "api authentication key",
+					Description: "The API Key that allows you access to your SiteHost account.",
 					Sensitive:   true,
 				}, "api_endpoint": {
 					Type:        schema.TypeString,
 					Optional:    true,
-					Description: "url prefix of the api server",
+					Description: "The HTTP(S) API address of the SiteHost API to use.",
 				},
 			},
 			DataSourcesMap: map[string]*schema.Resource{
-				"sitehost_server": dataSourceServer(),
+				"sitehost_server": server.DataSource(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
-				"sitehost_server": resourceServer(),
+				"sitehost_server": server.Resource(),
 			},
 		}
 
@@ -47,10 +49,10 @@ func New(version string) func() *schema.Provider {
 
 // configure return the Config with connection data
 func configure(_ context.Context, version string, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-	config := Config{
+	config := &helper.Config{
 		APIKey:           d.Get("api_key").(string),
 		ClientID:         d.Get("client_id").(string),
-		APIEnpoint:       d.Get("api_endpoint").(string),
+		APIEndpoint:      d.Get("api_endpoint").(string),
 		TerraformVersion: version,
 	}
 

@@ -2,10 +2,10 @@ package main
 
 import (
 	"flag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
-	"github.com/sitehostnz/terraform-provider-sitehost/internal/provider"
-)
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost"
+)
 
 // Generate the Terraform provider documentation using `tfplugindocs`:
 //go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
@@ -21,7 +21,7 @@ func main() {
 
 	opts := &plugin.ServeOpts{
 		Debug:        debugMode,
-		ProviderFunc: provider.New(version),
+		ProviderFunc: sitehost.New(version),
 	}
 
 	plugin.Serve(opts)
