@@ -1,3 +1,4 @@
+// Package helper provides the functions to work with SiteHost API.
 package helper
 
 import (
@@ -12,15 +13,23 @@ import (
 )
 
 const (
-	JobStatusPending         = "Pending"
-	JobStatusCompleted       = "Completed"
-	JobStatusFailed          = "Failed"
-	JobRequestDelay          = 10 * time.Second
-	JobRequestTimeout        = 60 * time.Minute
-	JobRequestMinTimeout     = 3 * time.Second
+	// JobStatusPending the name status for a pending job.
+	JobStatusPending = "Pending"
+	// JobStatusCompleted the name status for a completed job.
+	JobStatusCompleted = "Completed"
+	// JobStatusFailed  the name status for a failed job.
+	JobStatusFailed = "Failed"
+	// JobRequestDelay the time wait to send a new request to check the job status.
+	JobRequestDelay = 10 * time.Second
+	// JobRequestTimeout the time to wait before timeout.
+	JobRequestTimeout = 60 * time.Minute
+	// JobRequestMinTimeout smallest time to wait before refreshes.
+	JobRequestMinTimeout = 3 * time.Second
+	// JobRequestNotFoundChecks number of times to allow not found.
 	JobRequestNotFoundChecks = 60
 )
 
+// Config is a wrapper to save the configuration connection from terraform.
 type Config struct {
 	APIKey           string
 	ClientID         string
@@ -28,11 +37,13 @@ type Config struct {
 	TerraformVersion string
 }
 
+// CombinedConfig is s struct with API wrapper and the Config.
 type CombinedConfig struct {
 	Client *gosh.Client
 	Config *Config
 }
 
+// Client returns a new CombinedConfig instance.
 func (c *Config) Client() (*CombinedConfig, diag.Diagnostics) {
 	client := gosh.NewClient(c.APIKey, c.ClientID)
 
@@ -53,6 +64,7 @@ func (c *Config) Client() (*CombinedConfig, diag.Diagnostics) {
 	}, nil
 }
 
+// WaitForAction function to check the Job status in a refresh function.
 func WaitForAction(client *gosh.Client, jobID string) error {
 	var (
 		pending   = JobStatusPending

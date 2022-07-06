@@ -27,7 +27,8 @@ examples/.terraform.tfstate.lock.info
 *.test
 *.iml
 .vscode/
-
+coverage.txt
+bin
 vendor/
 
 # Test exclusions

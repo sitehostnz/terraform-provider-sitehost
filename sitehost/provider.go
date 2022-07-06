@@ -1,3 +1,4 @@
+// Package sitehost provides the functions to create a Terraform Provider to create resources via SiteHost API.
 package sitehost
 
 import (
@@ -9,7 +10,7 @@ import (
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server"
 )
 
-// New return a schema.Provider for SiteHost
+// New return a schema.Provider for SiteHost.
 func New(version string) func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
@@ -47,7 +48,7 @@ func New(version string) func() *schema.Provider {
 	}
 }
 
-// configure return the Config with connection data
+// configure return the Config with connection data.
 func configure(_ context.Context, version string, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	config := &helper.Config{
 		APIKey:           d.Get("api_key").(string),

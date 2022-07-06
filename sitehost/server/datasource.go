@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// DataSource returns a schema with the function to read Server resource.
 func DataSource() *schema.Resource {
 	recordSchema := serverDataSourceSchema()
 

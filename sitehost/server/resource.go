@@ -1,3 +1,4 @@
+// Package server provides the functions to create a Server resource via SiteHost API.
 package server
 
 import (
@@ -10,6 +11,7 @@ import (
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
+// Resource returns a schema with the operations for Server resource.
 func Resource() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: createResource,
@@ -21,12 +23,12 @@ func Resource() *schema.Resource {
 	}
 }
 
+// createResource function to create a new Server resource.
 func createResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*helper.CombinedConfig).Client
-
 	keys := d.Get("ssh_keys").([]interface{})
-	var sshKeys []string
 
+	sshKeys := make([]string, 0, len(keys))
 	for _, key := range keys {
 		sshKeys = append(sshKeys, key.(string))
 	}
@@ -48,9 +50,20 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	// Set data
 	d.SetId(res.Return.Name)
-	d.Set("name", res.Return.Name)
-	d.Set("password", res.Return.Password)
-	d.Set("ips", res.Return.Ips)
+	err = d.Set("name", res.Return.Name)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("password", res.Return.Password)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("ips", res.Return.Ips)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	// wait for "Completed" status
 	err = helper.WaitForAction(client, res.Return.JobID)
@@ -63,11 +76,11 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	return nil
 }
 
+// readResource function to read a new Server resource.
 func readResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*helper.CombinedConfig).Client
 
 	server, err := client.Servers.Get(context.Background(), d.Id())
-
 	if err != nil {
 		return diag.Errorf("Error retrieving server: %s", err)
 	}
@@ -80,6 +93,7 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	return nil
 }
 
+// updateResource function to update a new Server resource.
 func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*helper.CombinedConfig).Client
 
@@ -88,6 +102,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		if err != nil {
 			return diag.FromErr(err)
 		}
+
 		resp, err := client.Servers.CommitChanges(context.Background(), d.Id())
 		if err != nil {
 			return diag.FromErr(err)
@@ -113,11 +128,11 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	return readResource(ctx, d, meta)
 }
 
+// deleteResource function to delete a new Server resource.
 func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*helper.CombinedConfig).Client
 
 	resp, err := client.Servers.Delete(context.Background(), d.Id())
-
 	if err != nil {
 		return diag.Errorf("Error deleting server: %s", err)
 	}
@@ -130,7 +145,11 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	return nil
 }
 
+// setServerAttributes function to set data to a Server resource.
 func setServerAttributes(d *schema.ResourceData, server *gosh.Server) error {
-	d.Set("name", server.Name)
+	err := d.Set("name", server.Name)
+	if err != nil {
+		return err
+	}
 	return nil
 }
