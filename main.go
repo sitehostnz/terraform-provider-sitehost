@@ -10,7 +10,7 @@ import (
 // Generate the Terraform provider documentation using `tfplugindocs`:
 //go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 
-var version = "dev"
+var version = "1.0.0"
 
 func main() {
 	var debugMode bool
