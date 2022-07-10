@@ -6,7 +6,7 @@ To run this example, first configure your SiteHost provider as described in <htt
 
 ## Prerequisites
 
-You can see your `Client ID` and `API Key` can be generated at <https://cp.sitehost.nz/api/list-keys> by clicking "Add API Key". You can find out how to do this in our [knowledge base](https://kb.sitehost.nz/developers/api).
+Your `Client ID` and `API Key` values can be generated<https://cp.sitehost.nz/api/list-keys> by clicking "Add API Key". You can find out how to do this in our [knowledge base](https://kb.sitehost.nz/developers/api).
 
 You will need to export your SiteHost Client ID and API Key as an environment variable:
 
@@ -24,7 +24,7 @@ terraform init
 terraform apply
 ```
 
-The server and the installation should be completed in under 5 minutes.
+The server installation should be completed in under 5 minutes.
 
 ## Destroy the Resources
 

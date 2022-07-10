@@ -12,6 +12,7 @@ import (
 
 var version = "1.0.0"
 
+// main is a function to initialise the Terraform provider.
 func main() {
 	var debugMode bool
 	flag.BoolVar(&debugMode, "debug", false, "set to true to run the provider with support for debuggers")

@@ -2,6 +2,7 @@ package server
 
 import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+// resourceSchema is the schema with values for a Server DataSource.
 func serverDataSourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name": {

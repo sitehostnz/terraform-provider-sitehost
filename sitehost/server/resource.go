@@ -23,7 +23,7 @@ func Resource() *schema.Resource {
 	}
 }
 
-// createResource function to create a new Server resource.
+// createResource is a function to create a new Server resource.
 func createResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*helper.CombinedConfig).Client
 	keys := d.Get("ssh_keys").([]interface{})
@@ -50,24 +50,20 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	// Set data
 	d.SetId(res.Return.Name)
-	err = d.Set("name", res.Return.Name)
-	if err != nil {
+	if err = d.Set("name", res.Return.Name); err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("password", res.Return.Password)
-	if err != nil {
+	if err = d.Set("password", res.Return.Password); err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("ips", res.Return.Ips)
-	if err != nil {
+	if err = d.Set("ips", res.Return.Ips); err != nil {
 		return diag.FromErr(err)
 	}
 
 	// wait for "Completed" status
-	err = helper.WaitForAction(client, res.Return.JobID)
-	if err != nil {
+	if err = helper.WaitForAction(client, res.Return.JobID); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -76,7 +72,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	return nil
 }
 
-// readResource function to read a new Server resource.
+// readResource is a function to read a new Server resource.
 func readResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*helper.CombinedConfig).Client
 
@@ -85,21 +81,19 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		return diag.Errorf("Error retrieving server: %s", err)
 	}
 
-	err = setServerAttributes(d, server)
-	if err != nil {
+	if err = setServerAttributes(d, server); err != nil {
 		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-// updateResource function to update a new Server resource.
+// updateResource is a function to update a new Server resource.
 func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*helper.CombinedConfig).Client
 
 	if d.HasChange("product_code") {
-		err := client.Servers.Upgrade(context.Background(), &gosh.ServerUpgradeRequest{Name: d.Id(), Plan: d.Get("product_code").(string)})
-		if err != nil {
+		if err := client.Servers.Upgrade(context.Background(), &gosh.ServerUpgradeRequest{Name: d.Id(), Plan: d.Get("product_code").(string)}); err != nil {
 			return diag.FromErr(err)
 		}
 
@@ -108,8 +102,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 			return diag.FromErr(err)
 		}
 
-		err = helper.WaitForAction(client, resp.Return.JobID)
-		if err != nil {
+		if err = helper.WaitForAction(client, resp.Return.JobID); err != nil {
 			return diag.FromErr(err)
 		}
 
@@ -117,8 +110,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 
 	if d.HasChange("label") {
-		err := client.Servers.Update(context.Background(), &gosh.ServerUpdateRequest{Name: d.Id(), Label: d.Get("label").(string)})
-		if err != nil {
+		if err := client.Servers.Update(context.Background(), &gosh.ServerUpdateRequest{Name: d.Id(), Label: d.Get("label").(string)}); err != nil {
 			return diag.FromErr(err)
 		}
 
@@ -128,7 +120,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	return readResource(ctx, d, meta)
 }
 
-// deleteResource function to delete a new Server resource.
+// deleteResource is a function to delete a new Server resource.
 func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*helper.CombinedConfig).Client
 
@@ -137,19 +129,14 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("Error deleting server: %s", err)
 	}
 
-	err = helper.WaitForAction(client, resp.Return.JobID)
-	if err != nil {
+	if err = helper.WaitForAction(client, resp.Return.JobID); err != nil {
 		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-// setServerAttributes function to set data to a Server resource.
+// setServerAttributes is a function to set data to a Server resource.
 func setServerAttributes(d *schema.ResourceData, server *gosh.Server) error {
-	err := d.Set("name", server.Name)
-	if err != nil {
-		return err
-	}
-	return nil
+	return d.Set("name", server.Name)
 }

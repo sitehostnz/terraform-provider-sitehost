@@ -13,19 +13,19 @@ import (
 )
 
 const (
-	// JobStatusPending the name status for a pending job.
+	// JobStatusPending is the status for a pending job.
 	JobStatusPending = "Pending"
-	// JobStatusCompleted the name status for a completed job.
+	// JobStatusCompleted is the status for a completed job.
 	JobStatusCompleted = "Completed"
-	// JobStatusFailed  the name status for a failed job.
+	// JobStatusFailed is the status for a failed job.
 	JobStatusFailed = "Failed"
 	// JobRequestDelay the time wait to send a new request to check the job status.
 	JobRequestDelay = 10 * time.Second
 	// JobRequestTimeout the time to wait before timeout.
 	JobRequestTimeout = 60 * time.Minute
-	// JobRequestMinTimeout smallest time to wait before refreshes.
+	// JobRequestMinTimeout is the minimum time to wait before refreshes.
 	JobRequestMinTimeout = 3 * time.Second
-	// JobRequestNotFoundChecks number of times to allow not found.
+	// JobRequestNotFoundChecks is the number of times to allow not found.
 	JobRequestNotFoundChecks = 60
 )
 
@@ -37,7 +37,7 @@ type Config struct {
 	TerraformVersion string
 }
 
-// CombinedConfig is s struct with API wrapper and the Config.
+// CombinedConfig is a struct with API wrapper and the Config.
 type CombinedConfig struct {
 	Client *gosh.Client
 	Config *Config
@@ -64,7 +64,7 @@ func (c *Config) Client() (*CombinedConfig, diag.Diagnostics) {
 	}, nil
 }
 
-// WaitForAction function to check the Job status in a refresh function.
+// WaitForAction ia function to check the Job status in a refresh function.
 func WaitForAction(client *gosh.Client, jobID string) error {
 	var (
 		pending   = JobStatusPending
