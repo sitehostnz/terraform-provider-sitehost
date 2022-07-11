@@ -19,9 +19,9 @@ const (
 	JobStatusCompleted = "Completed"
 	// JobStatusFailed is the status for a failed job.
 	JobStatusFailed = "Failed"
-	// JobRequestDelay the time wait to send a new request to check the job status.
+	// JobRequestDelay is the time wait to send a new request to check the job status.
 	JobRequestDelay = 10 * time.Second
-	// JobRequestTimeout the time to wait before timeout.
+	// JobRequestTimeout is the time to wait before timeout.
 	JobRequestTimeout = 60 * time.Minute
 	// JobRequestMinTimeout is the minimum time to wait before refreshes.
 	JobRequestMinTimeout = 3 * time.Second
@@ -64,7 +64,7 @@ func (c *Config) Client() (*CombinedConfig, diag.Diagnostics) {
 	}, nil
 }
 
-// WaitForAction ia function to check the Job status in a refresh function.
+// WaitForAction is a function to check the Job status in a refresh function.
 func WaitForAction(client *gosh.Client, jobID string) error {
 	var (
 		pending   = JobStatusPending
