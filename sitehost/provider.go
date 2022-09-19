@@ -3,6 +3,9 @@ package sitehost
 
 import (
 	"context"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/api"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/domain"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/domain_record"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -19,12 +22,12 @@ func New(version string) func() *schema.Provider {
 					Type:        schema.TypeString,
 					Required:    true,
 					DefaultFunc: schema.EnvDefaultFunc("SH_CLIENT_ID", nil),
-					Description: "The client identifier that allows you access to your SiteHost account.",
+					Description: "The client identifier that allows you access to your SiteHost api.",
 				}, "api_key": {
 					Type:        schema.TypeString,
 					Required:    true,
 					DefaultFunc: schema.EnvDefaultFunc("SH_APIKEY", nil),
-					Description: "The API Key that allows you access to your SiteHost account.",
+					Description: "The API Key that allows you access to your SiteHost api.",
 					Sensitive:   true,
 				}, "api_endpoint": {
 					Type:        schema.TypeString,
@@ -33,10 +36,13 @@ func New(version string) func() *schema.Provider {
 				},
 			},
 			DataSourcesMap: map[string]*schema.Resource{
+				"sitehost_api":    api.DataSource(),
 				"sitehost_server": server.DataSource(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
-				"sitehost_server": server.Resource(),
+				"sitehost_server":        server.Resource(),
+				"sitehost_domain":        domain.Resource(),
+				"sitehost_domain_record": domain_record.Resource(),
 			},
 		}
 
