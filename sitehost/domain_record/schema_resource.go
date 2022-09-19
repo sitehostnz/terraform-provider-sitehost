@@ -45,6 +45,7 @@ var resourceSchema = map[string]*schema.Schema{
 		Optional:     true,
 		ValidateFunc: validation.IntBetween(0, 65535),
 		Description:  "The priority type",
+		Default:      0,
 	},
 
 	"ttl": {
@@ -58,6 +59,7 @@ var resourceSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			// bloody dots at the end of records...
 			return strings.TrimSuffix(old, ".") == strings.TrimSuffix(new, ".")
 		},
 	},

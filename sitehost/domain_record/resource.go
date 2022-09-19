@@ -12,6 +12,31 @@ import (
 	"strings"
 )
 
+func updateRecordResource(d *schema.ResourceData, domainRecord *gosh.DomainRecord) {
+	d.SetId(domainRecord.Id)
+	d.Set("domain", domainRecord.Domain)
+	d.Set("name", deconstructFqdn(domainRecord.Name, domainRecord.Domain))
+	d.Set("record", domainRecord.Content)
+	d.Set("type", domainRecord.Type)
+
+	ttl, e := strconv.Atoi(domainRecord.TTL)
+	if e == nil {
+		d.Set("ttl", ttl)
+	} else {
+		d.Set("ttl", 3600)
+	}
+
+	priority, e := strconv.Atoi(domainRecord.Priority)
+	if e == nil {
+		d.Set("priority", priority)
+	} else {
+		d.Set("priority", 0)
+	}
+
+	d.Set("fqdn", constructFqdn(domainRecord.Name, domainRecord.Domain))
+	d.Set("change_date", domainRecord.ChangeDate)
+}
+
 // Resource returns a schema with the operations for Server resource.
 func Resource() *schema.Resource {
 	return &schema.Resource{
@@ -52,11 +77,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("Failed creating domain_record: %s", domainRecord)
 	}
 
-	d.SetId(domainRecord.Id)
-	d.Set("ttl", strconv.Itoa(d.Get("ttl").(int)))
-	d.Set("fdqn", constructFqdn(domainRecord.Name, domainRecord.Domain))
-	d.Set("change_date", domainRecord.ChangeDate)
-	d.Set("record", domainRecord.Content)
+	updateRecordResource(d, domainRecord)
 
 	log.Printf("[INFO] Domain Record: %s", d.Id())
 
@@ -84,17 +105,7 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		return diag.Errorf("Failed retrieving domain_record: %s", err)
 	}
 
-	d.SetId(domainRecord.Id)
-	d.Set("domain", domainRecord.Domain)
-	d.Set("name", deconstructFqdn(domainRecord.Name, domainRecord.Domain))
-	d.Set("record", domainRecord.Content)
-	d.Set("type", domainRecord.Type)
-
-	d.Set("ttl", domainRecord.TTL)
-	d.Set("priority", domainRecord.Priority)
-
-	d.Set("fdqn", constructFqdn(domainRecord.Name, domainRecord.Domain))
-	d.Set("change_date", domainRecord.ChangeDate)
+	updateRecordResource(d, domainRecord)
 
 	return nil
 }
@@ -105,19 +116,40 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	_, err := client.DomainRecord.Delete(context.Background(), &gosh.DomainRecord{
 		ClientID: client.ClientID,
-		Name:     d.Get("name").(string),
 		Domain:   d.Get("domain").(string),
+		Name:     d.Get("name").(string),
 		Id:       d.Id(),
 	})
 
 	if err != nil {
-		return diag.Errorf("Error deleting domain: %s", err)
+		return diag.Errorf("Error deleting domain record: %s", err)
 	}
 
 	return nil
 }
 
 func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*helper.CombinedConfig).Client
+
+	domainRecord, err := client.DomainRecord.Update(context.Background(), &gosh.DomainRecord{
+		ClientID: client.ClientID,
+		Id:       d.Id(),
+		Domain:   d.Get("domain").(string),
+		Name:     d.Get("name").(string),
+		Type:     d.Get("type").(string),
+		Content:  d.Get("content").(string),
+		Priority: strconv.Itoa(d.Get("priority").(int)),
+	})
+
+	if err != nil {
+		return diag.Errorf("Error updating domain record: %s", err)
+	}
+
+	if domainRecord == nil {
+		return diag.Errorf("Failed updating domain_record: %s", err)
+	}
+
+	updateRecordResource(d, domainRecord)
 
 	return nil
 }
