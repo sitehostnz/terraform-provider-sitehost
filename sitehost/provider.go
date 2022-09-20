@@ -4,6 +4,7 @@ package sitehost
 import (
 	"context"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/api"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/domain"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/domain_record"
 
@@ -38,6 +39,7 @@ func New(version string) func() *schema.Provider {
 			DataSourcesMap: map[string]*schema.Resource{
 				"sitehost_api":    api.DataSource(),
 				"sitehost_server": server.DataSource(),
+				"sitehost_stack":  stack.DataSource(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
 				"sitehost_server":        server.Resource(),
