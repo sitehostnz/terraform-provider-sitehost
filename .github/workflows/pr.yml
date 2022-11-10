@@ -13,8 +13,11 @@ jobs:
         with:
           go-version: '^1.19.3'
 
-      - name: Install dependencies
-        run: sudo apt update && sudo apt install make git gcc --no-install-recommends
+      - name: Test
+        run: |
+          pwd
+          ls -la
+          git status
 
       - name: Run go tidy
         run: make tidy
