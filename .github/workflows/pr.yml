@@ -7,22 +7,25 @@ on:
 
 jobs:
   go-lint:
-    runs-on: golang:1.19.3-bullseye
+    runs-on: ubuntu-latest
     steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '^1.19.3'
+
       - name: Install dependencies
         run: apt update && apt install make git gcc --no-install-recommends
 
-      - name: Run make tidy
+      - name: Run go tidy
         run: make tidy
 
       - name: Run make dirty
         run: make -B dirty
 
-      - name: Run make vet
-        run: make vet
-
-      - name: Run linting
-        run: make lint
+      - name: Run vet & lint
+        run: |
+          make vet
+          make lint
 
       - name: Build go
         run: make build
