@@ -3,6 +3,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -24,20 +25,28 @@ func Resource() *schema.Resource {
 }
 
 // createResource is a function to create a new Server resource.
-func createResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*helper.CombinedConfig).Client
-	keys := d.Get("ssh_keys").([]interface{})
+func createResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	conf, ok := meta.(*helper.CombinedConfig)
+	if !ok {
+		return diag.Errorf("failed to convert meta object")
+	}
+
+	client := conf.Client
+	keys, ok := d.Get("ssh_keys").([]any)
+	if !ok {
+		return diag.Errorf("failed to convert ssh keys object")
+	}
 
 	sshKeys := make([]string, 0, len(keys))
 	for _, key := range keys {
-		sshKeys = append(sshKeys, key.(string))
+		sshKeys = append(sshKeys, fmt.Sprint(key))
 	}
 
 	opts := &gosh.ServerCreateRequest{
-		Label:       d.Get("label").(string),
-		Location:    d.Get("location").(string),
-		ProductCode: d.Get("product_code").(string),
-		Image:       d.Get("image").(string),
+		Label:       fmt.Sprint(d.Get("label")),
+		Location:    fmt.Sprint(d.Get("location")),
+		ProductCode: fmt.Sprint(d.Get("product_code")),
+		Image:       fmt.Sprint(d.Get("image")),
 		Params: gosh.ParamsOptions{
 			SSHKeys: sshKeys,
 		},
@@ -73,8 +82,13 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 }
 
 // readResource is a function to read a new Server resource.
-func readResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*helper.CombinedConfig).Client
+func readResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	conf, ok := meta.(*helper.CombinedConfig)
+	if !ok {
+		return diag.Errorf("failed to convert meta object")
+	}
+
+	client := conf.Client
 
 	server, err := client.Servers.Get(context.Background(), d.Id())
 	if err != nil {
@@ -89,11 +103,16 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 }
 
 // updateResource is a function to update a new Server resource.
-func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*helper.CombinedConfig).Client
+func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	conf, ok := meta.(*helper.CombinedConfig)
+	if !ok {
+		return diag.Errorf("failed to convert meta object")
+	}
+
+	client := conf.Client
 
 	if d.HasChange("product_code") {
-		if err := client.Servers.Upgrade(context.Background(), &gosh.ServerUpgradeRequest{Name: d.Id(), Plan: d.Get("product_code").(string)}); err != nil {
+		if err := client.Servers.Upgrade(context.Background(), &gosh.ServerUpgradeRequest{Name: d.Id(), Plan: fmt.Sprint(d.Get("product_code"))}); err != nil {
 			return diag.FromErr(err)
 		}
 
@@ -110,7 +129,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 
 	if d.HasChange("label") {
-		if err := client.Servers.Update(context.Background(), &gosh.ServerUpdateRequest{Name: d.Id(), Label: d.Get("label").(string)}); err != nil {
+		if err := client.Servers.Update(context.Background(), &gosh.ServerUpdateRequest{Name: d.Id(), Label: fmt.Sprint(d.Get("label"))}); err != nil {
 			return diag.FromErr(err)
 		}
 
@@ -121,8 +140,13 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 }
 
 // deleteResource is a function to delete a new Server resource.
-func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*helper.CombinedConfig).Client
+func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	conf, ok := meta.(*helper.CombinedConfig)
+	if !ok {
+		return diag.Errorf("failed to convert meta object")
+	}
+
+	client := conf.Client
 
 	resp, err := client.Servers.Delete(context.Background(), d.Id())
 	if err != nil {

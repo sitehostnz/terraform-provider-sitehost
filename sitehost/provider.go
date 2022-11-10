@@ -3,6 +3,7 @@ package sitehost
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -40,7 +41,7 @@ func New(version string) func() *schema.Provider {
 			},
 		}
 
-		p.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+		p.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (any, diag.Diagnostics) {
 			return configure(ctx, version, d)
 		}
 
@@ -49,11 +50,11 @@ func New(version string) func() *schema.Provider {
 }
 
 // configure returns the Config with connection data.
-func configure(_ context.Context, version string, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+func configure(_ context.Context, version string, d *schema.ResourceData) (any, diag.Diagnostics) {
 	config := &helper.Config{
-		APIKey:           d.Get("api_key").(string),
-		ClientID:         d.Get("client_id").(string),
-		APIEndpoint:      d.Get("api_endpoint").(string),
+		APIKey:           fmt.Sprint(d.Get("api_key")),
+		ClientID:         fmt.Sprint(d.Get("client_id")),
+		APIEndpoint:      fmt.Sprint(d.Get("api_endpoint")),
 		TerraformVersion: version,
 	}
 
