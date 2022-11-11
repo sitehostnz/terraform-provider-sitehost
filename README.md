@@ -61,7 +61,7 @@ $ make install
 If you're interested in contributing to our project:
 - Start by reading our [style guide](https://github.com/sitehostnz/go-style-guide/blob/master/style.md).
 - Explore our [issues](https://github.com/sitehostnz/terraform-provider-sitehost/issues).
-- Or send us feature request PRs.
+- Or send us feature PRs.
 
 ## License
 GoSH is distributed under MIT.
