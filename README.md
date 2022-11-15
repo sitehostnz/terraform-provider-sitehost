@@ -64,4 +64,4 @@ If you're interested in contributing to our project:
 - Or send us feature PRs.
 
 ## License
-GoSH is distributed under [MIT](./LICENSE.md).
+SiteHost Terraform project is distributed under [MIT](./LICENSE.md).
