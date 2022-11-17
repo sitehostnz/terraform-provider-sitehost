@@ -40,3 +40,5 @@ dist/
 
 # kubeconfig file produced by running example
 examples/kubernetes/kubeconfig
+
+terraform-provider-sitehost

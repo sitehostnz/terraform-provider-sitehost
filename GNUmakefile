@@ -41,7 +41,7 @@ lint: CGO_ENABLED = 1
 lint: GOARCH =
 lint: GOOS =
 lint: bin/golangci-lint $(SRC)
-	$< run
+	$< run --max-same-issues 50
 
 tidy:
 	go mod tidy

@@ -1,3 +1,4 @@
+// Package main is the starting point of the project to initialise the Terraform provider.
 package main
 
 import (

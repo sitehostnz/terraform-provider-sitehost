@@ -56,3 +56,12 @@ Enter the provider directory and build the provider
 ```bash
 $ make install
 ```
+
+## Contributing
+If you're interested in contributing to our project:
+- Start by reading our [style guide](https://github.com/sitehostnz/go-style-guide/blob/master/style.md).
+- Explore our [issues](https://github.com/sitehostnz/terraform-provider-sitehost/issues).
+- Or send us feature PRs.
+
+## License
+SiteHost Terraform project is distributed under [MIT](./LICENSE.md).

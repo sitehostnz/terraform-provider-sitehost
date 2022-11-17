@@ -70,7 +70,7 @@ func WaitForAction(client *gosh.Client, jobID string) error {
 		pending   = JobStatusPending
 		target    = JobStatusCompleted
 		ctx       = context.Background()
-		refreshFn = func() (result interface{}, state string, err error) {
+		refreshFn = func() (result any, state string, err error) {
 			j, err := client.Jobs.Get(ctx, jobID)
 			if err != nil {
 				return nil, "", err
