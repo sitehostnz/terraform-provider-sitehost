@@ -8,7 +8,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/sitehostnz/gosh"
+	"github.com/sitehostnz/gosh/pkg/api/server"
+	"github.com/sitehostnz/gosh/pkg/models"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
@@ -31,7 +32,8 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	client := conf.Client
+	client := server.New(conf.Client)
+
 	keys, ok := d.Get("ssh_keys").([]any)
 	if !ok {
 		return diag.Errorf("failed to convert ssh keys object")
@@ -42,37 +44,41 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		sshKeys = append(sshKeys, fmt.Sprint(key))
 	}
 
-	opts := &gosh.ServerCreateRequest{
+	opts := server.CreateRequest{
 		Label:       fmt.Sprint(d.Get("label")),
 		Location:    fmt.Sprint(d.Get("location")),
 		ProductCode: fmt.Sprint(d.Get("product_code")),
 		Image:       fmt.Sprint(d.Get("image")),
-		Params: gosh.ParamsOptions{
+		Params: server.ParamsOptions{
 			SSHKeys: sshKeys,
 		},
 	}
 
-	res, err := client.Servers.Create(ctx, opts)
+	res, err := client.Create(ctx, opts)
 	if err != nil {
 		return diag.Errorf("Error creating server: %s", err)
 	}
 
+	if !res.Status {
+		return diag.Errorf("Error creating server: %s", res.Msg)
+	}
+
 	// Set data
 	d.SetId(res.Return.Name)
-	if err = d.Set("name", res.Return.Name); err != nil {
+	if err := d.Set("name", res.Return.Name); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err = d.Set("password", res.Return.Password); err != nil {
+	if err := d.Set("password", res.Return.Password); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err = d.Set("ips", res.Return.Ips); err != nil {
+	if err := d.Set("ips", res.Return.Ips); err != nil {
 		return diag.FromErr(err)
 	}
 
 	// wait for "Completed" status
-	if err = helper.WaitForAction(client, res.Return.JobID); err != nil {
+	if err := helper.WaitForAction(conf.Client, res.Return.JobID); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -88,14 +94,18 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Di
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	client := conf.Client
+	client := server.New(conf.Client)
 
-	server, err := client.Servers.Get(context.Background(), d.Id())
+	resp, err := client.Get(context.Background(), server.GetRequest{ServerName: d.Id()})
 	if err != nil {
 		return diag.Errorf("Error retrieving server: %s", err)
 	}
 
-	if err = setServerAttributes(d, server); err != nil {
+	if !resp.Status {
+		return diag.Errorf("Error creating server: %s", resp.Msg)
+	}
+
+	if err := setServerAttributes(d, resp.Server); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -109,19 +119,19 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	client := conf.Client
+	client := server.New(conf.Client)
 
 	if d.HasChange("product_code") {
-		if err := client.Servers.Upgrade(context.Background(), &gosh.ServerUpgradeRequest{Name: d.Id(), Plan: fmt.Sprint(d.Get("product_code"))}); err != nil {
+		if err := client.Upgrade(context.Background(), server.UpgradeRequest{Name: d.Id(), Plan: fmt.Sprint(d.Get("product_code"))}); err != nil {
 			return diag.FromErr(err)
 		}
 
-		resp, err := client.Servers.CommitChanges(context.Background(), d.Id())
+		resp, err := client.CommitDiskChanges(context.Background(), server.CommitDiskChangesRequest{ServerName: d.Id()})
 		if err != nil {
 			return diag.FromErr(err)
 		}
 
-		if err = helper.WaitForAction(client, resp.Return.JobID); err != nil {
+		if err := helper.WaitForAction(conf.Client, resp.Return.JobID); err != nil {
 			return diag.FromErr(err)
 		}
 
@@ -129,7 +139,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	}
 
 	if d.HasChange("label") {
-		if err := client.Servers.Update(context.Background(), &gosh.ServerUpdateRequest{Name: d.Id(), Label: fmt.Sprint(d.Get("label"))}); err != nil {
+		if err := client.Update(context.Background(), server.UpdateRequest{Name: d.Id(), Label: fmt.Sprint(d.Get("label"))}); err != nil {
 			return diag.FromErr(err)
 		}
 
@@ -146,14 +156,14 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	client := conf.Client
+	client := server.New(conf.Client)
 
-	resp, err := client.Servers.Delete(context.Background(), d.Id())
+	resp, err := client.Delete(context.Background(), server.DeleteRequest{Name: d.Id()})
 	if err != nil {
 		return diag.Errorf("Error deleting server: %s", err)
 	}
 
-	if err = helper.WaitForAction(client, resp.Return.JobID); err != nil {
+	if err := helper.WaitForAction(conf.Client, resp.Return.JobID); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -161,6 +171,6 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 }
 
 // setServerAttributes is a function to set data to a Server resource.
-func setServerAttributes(d *schema.ResourceData, server *gosh.Server) error {
+func setServerAttributes(d *schema.ResourceData, server models.Server) error {
 	return d.Set("name", server.Name)
 }

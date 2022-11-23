@@ -3,13 +3,15 @@ package helper
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/url"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/sitehostnz/gosh"
+	"github.com/sitehostnz/gosh/pkg/api"
+	"github.com/sitehostnz/gosh/pkg/api/job"
 )
 
 const (
@@ -39,13 +41,13 @@ type Config struct {
 
 // CombinedConfig is a struct with API wrapper and the Config.
 type CombinedConfig struct {
-	Client *gosh.Client
+	Client *api.Client
 	Config *Config
 }
 
 // Client returns a new CombinedConfig instance.
 func (c *Config) Client() (*CombinedConfig, diag.Diagnostics) {
-	client := gosh.NewClient(c.APIKey, c.ClientID)
+	client := api.NewClient(c.APIKey, c.ClientID)
 
 	client.UserAgent = "Terraform/" + c.TerraformVersion
 
@@ -54,6 +56,7 @@ func (c *Config) Client() (*CombinedConfig, diag.Diagnostics) {
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
+
 		client.BaseURL = apiURL
 		log.Printf("[INFO] SiteHost Client configured for URL: %s", client.BaseURL.String())
 	}
@@ -65,32 +68,41 @@ func (c *Config) Client() (*CombinedConfig, diag.Diagnostics) {
 }
 
 // WaitForAction is a function to check the Job status in a refresh function.
-func WaitForAction(client *gosh.Client, jobID string) error {
+func WaitForAction(client *api.Client, jobID string) error {
 	var (
 		pending   = JobStatusPending
 		target    = JobStatusCompleted
 		ctx       = context.Background()
 		refreshFn = func() (result any, state string, err error) {
-			j, err := client.Jobs.Get(ctx, jobID)
+			svc := job.New(client)
+
+			j, err := svc.Get(ctx, job.GetRequest{
+				JobID: jobID,
+				Type:  "Daemon",
+			})
 			if err != nil {
 				return nil, "", err
 			}
-			if j.Return.State == JobStatusFailed {
-				return j, JobStatusFailed, nil
-			}
-			if j.Return.State == target {
-				return j, target, nil
+
+			if !j.Status {
+				return nil, "", errors.New("An error has occurred with a message: " + j.Msg)
 			}
 
-			return j, pending, nil
+			switch j.Return.State {
+			case JobStatusFailed:
+				return j, JobStatusFailed, nil
+			case target:
+				return j, target, nil
+			default:
+				return j, pending, nil
+			}
 		}
 	)
 
 	_, err := (&resource.StateChangeConf{
-		Pending: []string{pending},
-		Refresh: refreshFn,
-		Target:  []string{target},
-
+		Pending:        []string{pending},
+		Refresh:        refreshFn,
+		Target:         []string{target},
 		Delay:          JobRequestDelay,
 		Timeout:        JobRequestTimeout,
 		MinTimeout:     JobRequestMinTimeout,
