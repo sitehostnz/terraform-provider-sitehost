@@ -96,13 +96,15 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Di
 
 	client := server.New(conf.Client)
 
-	resp, err := client.Get(context.Background(), server.GetRequest{ServerName: d.Id()})
+	resp, err := client.Get(context.Background(), server.GetRequest{
+		ServerName: d.Id(),
+	})
 	if err != nil {
 		return diag.Errorf("Error retrieving server: %s", err)
 	}
 
 	if !resp.Status {
-		return diag.Errorf("Error creating server: %s", resp.Msg)
+		return diag.Errorf("Error retrieving server: %s", resp.Msg)
 	}
 
 	if err := setServerAttributes(d, resp.Server); err != nil {
@@ -122,7 +124,10 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	client := server.New(conf.Client)
 
 	if d.HasChange("product_code") {
-		res, err := client.Upgrade(context.Background(), server.UpgradeRequest{Name: d.Id(), Plan: fmt.Sprint(d.Get("product_code"))})
+		res, err := client.Upgrade(context.Background(), server.UpgradeRequest{
+			Name: d.Id(),
+			Plan: fmt.Sprint(d.Get("product_code")),
+		})
 		if err != nil {
 			return diag.Errorf("Error upgrading server: %s", err)
 		}
@@ -131,7 +136,9 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 			return diag.Errorf("Error upgrading server: %s", res.Msg)
 		}
 
-		resp, err := client.CommitDiskChanges(context.Background(), server.CommitDiskChangesRequest{ServerName: d.Id()})
+		resp, err := client.CommitDiskChanges(context.Background(), server.CommitDiskChangesRequest{
+			ServerName: d.Id(),
+		})
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -148,7 +155,10 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	}
 
 	if d.HasChange("label") {
-		res, err := client.Update(context.Background(), server.UpdateRequest{Name: d.Id(), Label: fmt.Sprint(d.Get("label"))})
+		res, err := client.Update(context.Background(), server.UpdateRequest{
+			Name:  d.Id(),
+			Label: fmt.Sprint(d.Get("label")),
+		})
 		if err != nil {
 			return diag.Errorf("Error updating server: %s", err)
 		}
@@ -172,9 +182,15 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 
 	client := server.New(conf.Client)
 
-	resp, err := client.Delete(context.Background(), server.DeleteRequest{Name: d.Id()})
+	resp, err := client.Delete(context.Background(), server.DeleteRequest{
+		Name: d.Id(),
+	})
 	if err != nil {
 		return diag.Errorf("Error deleting server: %s", err)
+	}
+
+	if !resp.Status {
+		return diag.Errorf("Error deleting server: %s", res.Msg)
 	}
 
 	if err := helper.WaitForAction(conf.Client, resp.Return.JobID); err != nil {
