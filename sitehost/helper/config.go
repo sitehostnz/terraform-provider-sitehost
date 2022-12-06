@@ -78,7 +78,7 @@ func WaitForAction(client *api.Client, jobID string) error {
 
 			j, err := svc.Get(ctx, job.GetRequest{
 				JobID: jobID,
-				Type:  "Daemon",
+				Type:  "daemon",
 			})
 			if err != nil {
 				return nil, "", err

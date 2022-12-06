@@ -122,13 +122,22 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	client := server.New(conf.Client)
 
 	if d.HasChange("product_code") {
-		if err := client.Upgrade(context.Background(), server.UpgradeRequest{Name: d.Id(), Plan: fmt.Sprint(d.Get("product_code"))}); err != nil {
-			return diag.FromErr(err)
+		res, err := client.Upgrade(context.Background(), server.UpgradeRequest{Name: d.Id(), Plan: fmt.Sprint(d.Get("product_code"))})
+		if err != nil {
+			return diag.Errorf("Error upgrading server: %s", err)
+		}
+
+		if !res.Status {
+			return diag.Errorf("Error upgrading server: %s", res.Msg)
 		}
 
 		resp, err := client.CommitDiskChanges(context.Background(), server.CommitDiskChangesRequest{ServerName: d.Id()})
 		if err != nil {
 			return diag.FromErr(err)
+		}
+
+		if !res.Status {
+			return diag.Errorf("Error upgrading server: %s", res.Msg)
 		}
 
 		if err := helper.WaitForAction(conf.Client, resp.Return.JobID); err != nil {
@@ -139,8 +148,13 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	}
 
 	if d.HasChange("label") {
-		if err := client.Update(context.Background(), server.UpdateRequest{Name: d.Id(), Label: fmt.Sprint(d.Get("label"))}); err != nil {
-			return diag.FromErr(err)
+		res, err := client.Update(context.Background(), server.UpdateRequest{Name: d.Id(), Label: fmt.Sprint(d.Get("label"))})
+		if err != nil {
+			return diag.Errorf("Error updating server: %s", err)
+		}
+
+		if !res.Status {
+			return diag.Errorf("Error updating server: %s", res.Msg)
 		}
 
 		return nil
