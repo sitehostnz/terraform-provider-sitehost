@@ -39,7 +39,7 @@ You can [read more about the steps to create a SiteHost API KEY in our knowledge
 
 ### Locations - Product Codes - Images
 
-Check our KB to see the the complete list of [locations](http://kb.sitehost.nz/developers/api/locations), [product codes](http://kb.sitehost.nz/developers/api/product-codes) and [images](http://kb.sitehost.nz/developers/api/images).
+Check our KB to see the complete list of [locations](http://kb.sitehost.nz/developers/api/locations), [product codes](http://kb.sitehost.nz/developers/api/product-codes) and [images](http://kb.sitehost.nz/developers/api/images).
 
 
 ### Building The Provider (For developers)
