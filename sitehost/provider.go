@@ -4,6 +4,9 @@ package sitehost
 import (
 	"context"
 	"fmt"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/api_info"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/domain"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/domain_record"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
