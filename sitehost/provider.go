@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/api_info"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/environment"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/domain"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/domain_record"
 
@@ -42,11 +43,15 @@ func New(version string) func() *schema.Provider {
 				"sitehost_api":    api_info.DataSource(),
 				"sitehost_stack":  stack.DataSource(),
 				// "sitehost_stack_database": database.DataSource(),
+				"sitehost_stack_environment": environment.DataSource(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
-				"sitehost_server":        server.Resource(),
-				"sitehost_domain":        domain.Resource(),
-				"sitehost_domain_record": domain_record.Resource(),
+				"sitehost_server":            server.Resource(),
+				"sitehost_domain":            domain.Resource(),
+				"sitehost_domain_record":     domain_record.Resource(),
+				"sitehost_stack":             stack.Resource(),
+				"sitehost_stack_environment": environment.Resource(),
+				// "sitehost_stack_database": database.Resource(),
 			},
 		}
 

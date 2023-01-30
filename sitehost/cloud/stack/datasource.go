@@ -25,7 +25,7 @@ func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	client := stack.New(conf.Client)
 
-	stack, err := client.Get(ctx, &stack.GetRequest{
+	stack, err := client.Get(ctx, stack.GetRequest{
 		ServerName: d.Get("server_name").(string),
 		Name:       d.Get("name").(string),
 	})
@@ -34,10 +34,15 @@ func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 
 	d.SetId(stack.Name)
-	d.Set("server_id", stack.ServerID)
+
 	d.Set("label", stack.Label)
+
+	d.Set("server_id", stack.ServerID)
 	d.Set("server_name", stack.Server)
 	d.Set("server_label", stack.ServerLabel)
+
+	d.Set("ip_address", stack.IpAddress)
+	d.Set("docker_file", stack.DockerFile)
 
 	return nil
 }
