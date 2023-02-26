@@ -1,13 +1,25 @@
-package domain_record
+package dns
 
 import (
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"strings"
 )
 
-// resourceSchema is the schema with values for a Server resource.
-var resourceSchema = map[string]*schema.Schema{
+// resourceZoneSchema is the schema with values for a Server resource.
+var resourceZoneSchema = map[string]*schema.Schema{
+	"name": {
+		Type:         schema.TypeString,
+		Required:     true,
+		ForceNew:     true,
+		ValidateFunc: validation.NoZeroValues,
+		Description:  "The domain name",
+	},
+}
+
+// resourceRecordSchema is the schema with values for a Server resource.
+var resourceRecordSchema = map[string]*schema.Schema{
 	"domain": {
 		Type:         schema.TypeString,
 		Required:     true,
