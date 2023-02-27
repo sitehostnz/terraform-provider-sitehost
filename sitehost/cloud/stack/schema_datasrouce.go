@@ -4,8 +4,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// // resourceSchema is the schema with values for a Server resource.
-// DataSource returns a schema with the function to read Server resource.
+// stackDataSourceSchema is the schema with values for a cloud stack resource.
 func stackDataSourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"client_id": {

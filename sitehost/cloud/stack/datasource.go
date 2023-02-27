@@ -1,3 +1,4 @@
+// Package stack provides the functions to create/get cloud stacks resource via SiteHost API.
 package stack
 
 import (
@@ -9,6 +10,7 @@ import (
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
+// DataSource returns a schema with the function to read cloud stack resource.
 func DataSource() *schema.Resource {
 	recordSchema := stackDataSourceSchema()
 
@@ -18,6 +20,7 @@ func DataSource() *schema.Resource {
 	}
 }
 
+// readDataSource calls the GoSH client to set the cloud stack schema.
 func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -26,7 +29,7 @@ func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	client := stack.New(conf.Client)
 
-	stack, err := client.Get(ctx, stack.GetRequest{
+	resp, err := client.Get(ctx, stack.GetRequest{
 		ServerName: d.Get("server_name").(string),
 		Name:       d.Get("name").(string),
 	})
@@ -34,11 +37,27 @@ func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("Error retrieving api info: %s", err)
 	}
 
-	d.SetId(stack.Stack.Name)
-	d.Set("server_id", stack.Stack.ServerID)
-	d.Set("label", stack.Stack.Label)
-	d.Set("server_name", stack.Stack.Server)
-	d.Set("server_label", stack.Stack.ServerLabel)
+	if !resp.Status {
+		return diag.Errorf("Error retrieving api info: %s", resp.Msg)
+	}
+
+	d.SetId(resp.Stack.Name)
+
+	if err := d.Set("server_id", resp.Stack.ServerID); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("label", resp.Stack.Label); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("server_name", resp.Stack.Server); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("server_label", resp.Stack.ServerLabel); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

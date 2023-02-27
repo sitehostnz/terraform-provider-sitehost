@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// resourceZoneSchema is the schema with values for a Server resource.
+// resourceZoneSchema is the schema with values for a DNS zone resource.
 var resourceZoneSchema = map[string]*schema.Schema{
 	"name": {
 		Type:         schema.TypeString,
@@ -18,7 +18,7 @@ var resourceZoneSchema = map[string]*schema.Schema{
 	},
 }
 
-// resourceRecordSchema is the schema with values for a Server resource.
+// resourceRecordSchema is the schema with values for a DNS record resource.
 var resourceRecordSchema = map[string]*schema.Schema{
 	"domain": {
 		Type:         schema.TypeString,
@@ -70,9 +70,8 @@ var resourceRecordSchema = map[string]*schema.Schema{
 	"record": {
 		Type:     schema.TypeString,
 		Optional: true,
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			// bloody dots at the end of records...
-			return strings.TrimSuffix(old, ".") == strings.TrimSuffix(new, ".")
+		DiffSuppressFunc: func(k, oldRecord, newRecord string, d *schema.ResourceData) bool {
+			return strings.TrimSuffix(oldRecord, ".") == strings.TrimSuffix(newRecord, ".")
 		},
 	},
 
