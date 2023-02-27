@@ -26,7 +26,7 @@ func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	client := stack.New(conf.Client)
 
-	stack, err := client.Get(ctx, &stack.GetRequest{
+	stack, err := client.Get(ctx, stack.GetRequest{
 		ServerName: d.Get("server_name").(string),
 		Name:       d.Get("name").(string),
 	})
@@ -34,11 +34,11 @@ func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("Error retrieving api info: %s", err)
 	}
 
-	d.SetId(stack.Name)
-	d.Set("server_id", stack.ServerID)
-	d.Set("label", stack.Label)
-	d.Set("server_name", stack.Server)
-	d.Set("server_label", stack.ServerLabel)
+	d.SetId(stack.Stack.Name)
+	d.Set("server_id", stack.Stack.ServerID)
+	d.Set("label", stack.Stack.Label)
+	d.Set("server_name", stack.Stack.Server)
+	d.Set("server_label", stack.Stack.ServerLabel)
 
 	return nil
 }
