@@ -48,6 +48,8 @@ func New(version string) func() *schema.Provider {
 			},
 			ResourcesMap: map[string]*schema.Resource{
 				"sitehost_server":            server.Resource(),
+				"sitehost_dns_zone":          dns.DNSZoneResource(),
+				"sitehost_dns_record":        dns.DNSRecordResource(),
 				"sitehost_stack":             stack.Resource(),
 				"sitehost_stack_environment": environment.Resource(),
 				// "sitehost_stack_database": database.Resource(),
