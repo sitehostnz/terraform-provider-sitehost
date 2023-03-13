@@ -82,7 +82,6 @@ var resourceRecordSchema = map[string]*schema.Schema{
 		Optional: true,
 		DiffSuppressFunc: func(k, oldRecord, newRecord string, d *schema.ResourceData) bool {
 			return strings.TrimSuffix(oldRecord, ".") == strings.TrimSuffix(newRecord, ".")
-			return strings.TrimSuffix(oldRecord, ".") == strings.TrimSuffix(newRecord, ".")
 		},
 	},
 
