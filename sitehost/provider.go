@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/api_info"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/db"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/environment"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/dns"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
@@ -37,10 +38,10 @@ func New(version string) func() *schema.Provider {
 				},
 			},
 			DataSourcesMap: map[string]*schema.Resource{
-				"sitehost_server": server.DataSource(),
-				"sitehost_api":    api_info.DataSource(),
-				"sitehost_stack":  stack.DataSource(),
-				// "sitehost_stack_database": database.DataSource(),
+				"sitehost_server":            server.DataSource(),
+				"sitehost_api":               api_info.DataSource(),
+				"sitehost_stack":             stack.DataSource(),
+				"sitehost_cloud_database":    db.DataSource(),
 				"sitehost_stack_environment": environment.DataSource(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
@@ -49,7 +50,7 @@ func New(version string) func() *schema.Provider {
 				"sitehost_dns_record":        dns.DNSRecordResource(),
 				"sitehost_stack":             stack.Resource(),
 				"sitehost_stack_environment": environment.Resource(),
-				// "sitehost_stack_database": database.Resource(),
+				"sitehost_cloud_database":    db.Resource(),
 			},
 		}
 
