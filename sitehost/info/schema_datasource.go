@@ -1,9 +1,10 @@
-package api
+package info
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// apiInfoDataSourceSchema is the schema with values for API info resource.
 func apiInfoDataSourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"client_id": {

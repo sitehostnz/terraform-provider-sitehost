@@ -8,8 +8,19 @@ import (
 	"github.com/sitehostnz/gosh/pkg/utils"
 )
 
-// dnsRecordResourceSchema is the schema with values for a Server resource.
-var dnsRecordResourceSchema = map[string]*schema.Schema{
+// resourceZoneSchema is the schema with values for a DNS zone resource.
+var resourceZoneSchema = map[string]*schema.Schema{
+	"name": {
+		Type:         schema.TypeString,
+		Required:     true,
+		ForceNew:     true,
+		ValidateFunc: validation.NoZeroValues,
+		Description:  "The domain name",
+	},
+}
+
+// resourceRecordSchema is the schema with values for a DNS record resource.
+var resourceRecordSchema = map[string]*schema.Schema{
 	"domain": {
 		Type:         schema.TypeString,
 		Required:     true,
@@ -69,11 +80,9 @@ var dnsRecordResourceSchema = map[string]*schema.Schema{
 	"content": {
 		Type:     schema.TypeString,
 		Optional: true,
-		DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
-			// bloody dots at the end of records...
-			// we have to do this, mainly for NS and CNAME records
-			// Possibly MX records too... hell, let's just do them all
-			return strings.TrimSuffix(oldValue, ".") == strings.TrimSuffix(newValue, ".")
+		DiffSuppressFunc: func(k, oldRecord, newRecord string, d *schema.ResourceData) bool {
+			return strings.TrimSuffix(oldRecord, ".") == strings.TrimSuffix(newRecord, ".")
+			return strings.TrimSuffix(oldRecord, ".") == strings.TrimSuffix(newRecord, ".")
 		},
 	},
 
