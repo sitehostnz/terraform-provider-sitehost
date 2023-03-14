@@ -133,7 +133,7 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 		Domain:   domain,
 		Type:     fmt.Sprintf("%v", d.Get("type")),
 		Name:     domainRecord,
-		Content:  fmt.Sprintf("%v", d.Get("record")),
+		Content:  fmt.Sprintf("%v", d.Get("content")),
 		Priority: fmt.Sprintf("%v", d.Get("priority")),
 	})
 	if err != nil {
