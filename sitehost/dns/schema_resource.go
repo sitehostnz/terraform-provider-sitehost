@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/sitehostnz/gosh/pkg/utils"
 )
 
 // resourceZoneSchema is the schema with values for a DNS zone resource.
@@ -31,8 +32,17 @@ var resourceRecordSchema = map[string]*schema.Schema{
 	"name": {
 		Type:         schema.TypeString,
 		Required:     true,
+		ForceNew:     false,
 		ValidateFunc: validation.NoZeroValues,
 		Description:  "The subdomain",
+		DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+			domain := d.Get("domain").(string)
+
+			oldValue = utils.ConstructFqdn(oldValue, domain)
+			newValue = utils.ConstructFqdn(newValue, domain)
+
+			return newValue == oldValue
+		},
 	},
 
 	"type": {
@@ -67,7 +77,7 @@ var resourceRecordSchema = map[string]*schema.Schema{
 		ValidateFunc: validation.IntAtLeast(1),
 	},
 
-	"record": {
+	"content": {
 		Type:     schema.TypeString,
 		Optional: true,
 		DiffSuppressFunc: func(k, oldRecord, newRecord string, d *schema.ResourceData) bool {
