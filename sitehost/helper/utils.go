@@ -20,3 +20,11 @@ func First[T any](ss []T, test func(T) bool) (ret T) {
 	}
 	return
 }
+
+// Map the things.
+func Map[T any, R any](ss []T, m func(T) R) (ret []R) {
+	for _, s := range ss {
+		ret = append(ret, m(s))
+	}
+	return
+}

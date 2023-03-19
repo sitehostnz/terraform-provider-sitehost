@@ -1,6 +1,7 @@
 package dns
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -36,7 +37,7 @@ var resourceRecordSchema = map[string]*schema.Schema{
 		ValidateFunc: validation.NoZeroValues,
 		Description:  "The subdomain",
 		DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
-			domain := d.Get("domain").(string)
+			domain := fmt.Sprintf("%v", d.Get("domain"))
 
 			oldValue = utils.ConstructFqdn(oldValue, domain)
 			newValue = utils.ConstructFqdn(newValue, domain)
