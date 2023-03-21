@@ -5,15 +5,17 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/dns"
+	"github.com/sitehostnz/gosh/pkg/models"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
-// ZoneResource returns a schema with the operations for DNS resource.
+// ZoneResource returns a schema with the operations for DNS Zone resource.
 func ZoneResource() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: createZoneResource,
@@ -26,7 +28,6 @@ func ZoneResource() *schema.Resource {
 	}
 }
 
-// createResource is a function to create a new DNS resource.
 func createZoneResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -53,7 +54,6 @@ func createZoneResource(ctx context.Context, d *schema.ResourceData, meta interf
 	return nil
 }
 
-// readResource is a function to read a new DNS resource.
 func readZoneResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -83,7 +83,6 @@ func readZoneResource(ctx context.Context, d *schema.ResourceData, meta interfac
 	return diag.Errorf("Error finding the domain")
 }
 
-// deleteResource is a function to delete a new DNS resource.
 func deleteZoneResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -103,7 +102,7 @@ func deleteZoneResource(ctx context.Context, d *schema.ResourceData, meta interf
 	return nil
 }
 
-// RecordResource returns a schema with the operations for DNS resource.
+// RecordResource returns a schema with the operations for DNS Record resource.
 func RecordResource() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: createRecordResource,
@@ -117,24 +116,27 @@ func RecordResource() *schema.Resource {
 	}
 }
 
-// createResource is a function to create a new Server resource.
 func createRecordResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	domain := fmt.Sprintf("%v", d.Get("domain"))
-	name := fmt.Sprintf("%v", d.Get("name"))
-	domainRecord := helper.ConstructFqdn(name, domain)
+	domainRecord := models.DNSRecord{
+		Name:     fmt.Sprintf("%v", d.Get("name")),
+		Domain:   fmt.Sprintf("%v", d.Get("domain")),
+		Type:     fmt.Sprintf("%v", d.Get("type")),
+		Content:  fmt.Sprintf("%v", d.Get("record")),
+		Priority: fmt.Sprintf("%v", d.Get("priority")),
+	}
 
 	client := dns.New(conf.Client)
 	resp, err := client.AddRecord(ctx, dns.AddRecordRequest{
-		Domain:   domain,
-		Type:     fmt.Sprintf("%v", d.Get("type")),
-		Name:     domainRecord,
-		Content:  fmt.Sprintf("%v", d.Get("record")),
-		Priority: fmt.Sprintf("%v", d.Get("priority")),
+		Domain:   domainRecord.Domain,
+		Type:     domainRecord.Type,
+		Name:     domainRecord.Name,
+		Content:  domainRecord.Content,
+		Priority: domainRecord.Priority,
 	})
 	if err != nil {
 		return diag.Errorf("Error creating DNS record: %s", err)
@@ -144,14 +146,20 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.Errorf("Error creating DNS record: %s", resp.Msg)
 	}
 
-	d.SetId(domainRecord)
+	record, err := client.GetRecordWithRecord(ctx, domainRecord)
+	if err != nil {
+		return diag.Errorf("Error creating DNS record: %s", err)
+	}
+
+	if err := setRecordAttributes(d, record); err != nil {
+		return diag.FromErr(err)
+	}
 
 	log.Printf("[INFO] Domain Record: %s", d.Id())
 
 	return nil
 }
 
-// readResource is a function to read a new Server resource.
 func readRecordResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -161,21 +169,21 @@ func readRecordResource(ctx context.Context, d *schema.ResourceData, meta interf
 	client := dns.New(conf.Client)
 
 	domain := fmt.Sprintf("%v", d.Get("domain"))
-	resp, err := client.ListRecords(ctx, dns.ListRecordsRequest{
-		Domain: domain,
+	resp, err := client.GetRecord(ctx, dns.RecordRequest{
+		ID:         d.Id(),
+		DomainName: domain,
 	})
 	if err != nil {
 		return diag.Errorf("Error retrieving DNS zone: %s", err)
 	}
 
-	if !resp.Status {
-		return diag.Errorf("Error creating DNS zone: %s", resp.Msg)
+	if err := setRecordAttributes(d, resp); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-// deleteResource is a function to delete a new Server resource.
 func deleteRecordResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -212,7 +220,7 @@ func updateRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 			RecordID: d.Id(),
 			Type:     fmt.Sprintf("%v", d.Get("type")),
 			Name:     fmt.Sprintf("%v", d.Get("name")),
-			Content:  fmt.Sprintf("%v", d.Get("content")),
+			Content:  fmt.Sprintf("%v", d.Get("record")),
 			Priority: fmt.Sprintf("%v", d.Get("priority")),
 		},
 	)
@@ -222,6 +230,18 @@ func updateRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 
 	if !resp.Status {
 		return diag.Errorf("Error updating DNS record: %s", resp.Msg)
+	}
+
+	record, err := client.GetRecord(ctx, dns.RecordRequest{
+		ID:         d.Id(),
+		DomainName: fmt.Sprintf("%v", d.Get("domain")),
+	})
+	if err != nil {
+		return diag.Errorf("Error creating DNS record: %s", err)
+	}
+
+	if err := setRecordAttributes(d, record); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -238,4 +258,39 @@ func importRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func setRecordAttributes(d *schema.ResourceData, record models.DNSRecord) error {
+	d.SetId(record.ID)
+
+	if err := d.Set("domain", record.Domain); err != nil {
+		return err
+	}
+
+	if err := d.Set("name", record.Name); err != nil {
+		return err
+	}
+
+	if err := d.Set("type", record.Type); err != nil {
+		return err
+	}
+
+	priority, err := strconv.Atoi(record.Priority)
+	if err != nil {
+		priority = 0
+	}
+
+	if err := d.Set("priority", priority); err != nil {
+		return err
+	}
+
+	if err := d.Set("record", record.Content); err != nil {
+		return err
+	}
+
+	if err := d.Set("change_date", record.ChangeDate); err != nil {
+		return err
+	}
+
+	return nil
 }
