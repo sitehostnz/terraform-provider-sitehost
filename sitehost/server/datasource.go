@@ -18,6 +18,7 @@ func DataSource() *schema.Resource {
 	}
 }
 
+// readDataSource is a function to read a servers (not implemented).
 func readDataSource(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	fmt.Println("not implemented")
 	return nil

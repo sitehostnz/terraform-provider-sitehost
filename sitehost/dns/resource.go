@@ -28,6 +28,7 @@ func ZoneResource() *schema.Resource {
 	}
 }
 
+// createZoneResource is a function to create a new DNS Zone.
 func createZoneResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -54,6 +55,7 @@ func createZoneResource(ctx context.Context, d *schema.ResourceData, meta interf
 	return nil
 }
 
+// readZoneResource is a function to read a DNS Zone.
 func readZoneResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -83,6 +85,7 @@ func readZoneResource(ctx context.Context, d *schema.ResourceData, meta interfac
 	return diag.Errorf("Error finding the domain")
 }
 
+// deleteZoneResource is a function to delete a DNS Zone.
 func deleteZoneResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -116,6 +119,7 @@ func RecordResource() *schema.Resource {
 	}
 }
 
+// createRecordResource is a function to create a new DNS Record.
 func createRecordResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -160,6 +164,7 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
+// readRecordResource is a function to read a DNS Record.
 func readRecordResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -184,6 +189,7 @@ func readRecordResource(ctx context.Context, d *schema.ResourceData, meta interf
 	return nil
 }
 
+// deleteRecordResource is a function to delete a DNS Record.
 func deleteRecordResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -206,6 +212,7 @@ func deleteRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
+// updateRecordResource is a function to update a DNS Record.
 func updateRecordResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -247,6 +254,7 @@ func updateRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
+// importRecordResource is a function to import a DNS Record.
 func importRecordResource(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	if strings.Contains(d.Id(), ",") {
 		s := strings.Split(d.Id(), ",")
@@ -260,6 +268,7 @@ func importRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 	return []*schema.ResourceData{d}, nil
 }
 
+// setRecordAttributes is a function to set the attributes of a DNS Record.
 func setRecordAttributes(d *schema.ResourceData, record models.DNSRecord) error {
 	d.SetId(record.ID)
 
@@ -288,9 +297,5 @@ func setRecordAttributes(d *schema.ResourceData, record models.DNSRecord) error 
 		return err
 	}
 
-	if err := d.Set("change_date", record.ChangeDate); err != nil {
-		return err
-	}
-
-	return nil
+	return d.Set("change_date", record.ChangeDate)
 }

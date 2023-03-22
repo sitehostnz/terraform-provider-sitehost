@@ -2,7 +2,7 @@
 
 This example adds a [DNS Zone](https://kb.sitehost.nz/dns/dns-zones) to SiteHost Control Panel and adds the MX records to link your domain with [Google Workspace](https://support.google.com/a/answer/174125?hl=en).
 
->Note: To run this example, first configure your SiteHost provider as described in <https://kb.sitehost.nz/developers/terraform-provider>.
+> Note: To run this example, first configure your SiteHost provider as described in <https://kb.sitehost.nz/developers/terraform-provider>.
 
 ## Prerequisites
 
@@ -28,7 +28,7 @@ terraform init
 terraform apply
 ```
 
->To use the DNS Zones manager you need to use the [SiteHost Nameservers](https://kb.sitehost.nz/domains/name-servers).
+> To use the DNS Zones manager you need to use the [SiteHost Nameservers](https://kb.sitehost.nz/domains/name-servers).
 
 ## Destroy the Resources
 

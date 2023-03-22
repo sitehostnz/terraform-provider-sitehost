@@ -20,6 +20,7 @@ func DataSource() *schema.Resource {
 	}
 }
 
+// readDataSource is a function to read api info.
 func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {

@@ -24,7 +24,7 @@ terraform init
 terraform apply
 ```
 
->The server installation should be completed in under 5 minutes.
+> The server installation should be completed in under 5 minutes.
 
 ## Destroy the Resources
 
