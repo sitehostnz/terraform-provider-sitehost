@@ -20,7 +20,9 @@ func Resource() *schema.Resource {
 		ReadContext:   readResource,
 		UpdateContext: updateResource,
 		DeleteContext: deleteResource,
-
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 		Schema: resourceSchema,
 	}
 }

@@ -1,6 +1,6 @@
-# SiteHost Linux VPS + Nginx
+# SiteHost DNS
 
-This example launches a Ubuntu 22.04 LTS server with a nginx web server.
+This example adds a [DNS Zone](https://kb.sitehost.nz/dns/dns-zones) to SiteHost Control Panel and adds the MX records to link your domain with [Google Workspace](https://support.google.com/a/answer/174125?hl=en).
 
 > Note: To run this example, first configure your SiteHost provider as described in <https://kb.sitehost.nz/developers/terraform-provider>.
 
@@ -15,16 +15,20 @@ export TF_VAR_sitehost_client_id="Put Your SiteHost Client ID Here"
 export TF_VAR_sitehost_api_key="Put Your SiteHost API key Here"
 ```
 
+## Set your Domain Name
+
+Edit the `domain_name` value in the [variable.tf](./variable.tf) file.
+
 ## Run this example
 
-From the `examples/nginx` directory.
+From the `examples/dns` directory.
 
 ```sh
 terraform init
 terraform apply
 ```
 
-> The server installation should be completed in under 5 minutes.
+> To use the DNS Zones manager you need to use the [SiteHost Nameservers](https://kb.sitehost.nz/domains/name-servers).
 
 ## Destroy the Resources
 
