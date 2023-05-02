@@ -4,13 +4,11 @@ package sitehost
 import (
 	"context"
 	"fmt"
-	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/api_info"
-	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/domain"
-	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/domain_record"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/db"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/environment"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/dns"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/info"
@@ -41,7 +39,7 @@ func New(version string) func() *schema.Provider {
 			},
 			DataSourcesMap: map[string]*schema.Resource{
 				"sitehost_server":            server.DataSource(),
-				"sitehost_api":               api.DataSource(),
+				"sitehost_api":               info.DataSource(),
 				"sitehost_stack":             stack.DataSource(),
 				"sitehost_cloud_database":    db.DataSource(),
 				"sitehost_stack_environment": environment.DataSource(),
