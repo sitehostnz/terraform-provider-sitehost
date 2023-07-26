@@ -1,0 +1,15 @@
+package db
+
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
+// DataSource is the datasource for a cloud database.
+func DataSource() *schema.Resource {
+	recordSchema := databaseDataSourceSchema()
+
+	return &schema.Resource{
+		ReadContext: readResource,
+		Schema:      recordSchema,
+	}
+}
