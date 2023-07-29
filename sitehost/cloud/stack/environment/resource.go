@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/sitehostnz/gosh/pkg/api/job"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"

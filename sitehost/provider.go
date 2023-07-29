@@ -4,8 +4,6 @@ package sitehost
 import (
 	"context"
 	"fmt"
-	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/image"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack"
@@ -40,20 +38,35 @@ func New(version string) func() *schema.Provider {
 				},
 			},
 			DataSourcesMap: map[string]*schema.Resource{
-				"sitehost_server":            server.DataSource(),
-				"sitehost_api":               info.DataSource(),
-				"sitehost_stack":             stack.DataSource(),
-				"sitehost_stack_image":       image.DataSource(),
-				"sitehost_stack_database":    db.DataSource(),
+				"sitehost_server": server.DataSource(),
+				"sitehost_api":    info.DataSource(),
+				"sitehost_stack":  stack.DataSource(),
+
+				//"sitehost_dns_zone":          dns.ZoneD(),
+				//"sitehost_dns_record":        dns.RecordResource(),
+				//				"sitehost_stack_image":       image.DataSource(),
+
+				"sitehost_stack_database": db.DataSource(),
+				// stack_database_user
+				// stack_database_grant
+
 				"sitehost_stack_environment": environment.DataSource(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
-				"sitehost_server":            server.Resource(),
-				"sitehost_dns_zone":          dns.ZoneResource(),
-				"sitehost_dns_record":        dns.RecordResource(),
+				"sitehost_server":     server.Resource(),
+				"sitehost_dns_zone":   dns.ZoneResource(),
+				"sitehost_dns_record": dns.RecordResource(),
+
+				//stack_id
+				// stack_docker_file
+
 				"sitehost_stack":             stack.Resource(),
 				"sitehost_stack_environment": environment.Resource(),
-				"sitehost_cloud_database":    db.Resource(),
+
+				"sitehost_cloud_database": db.Resource(),
+				// stack_database_user
+				// stack_database_grant
+
 			},
 		}
 
