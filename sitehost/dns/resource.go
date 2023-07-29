@@ -126,12 +126,15 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.Errorf("failed to convert meta object")
 	}
 
+//	domain := fmt.Sprintf("%v", d.Get("domain"))
+//	name := fmt.Sprintf("%v", d.Get("name"))
+// domainRecord := helper.ConstructFqdn(name, domain)	
 	domainRecord := models.DNSRecord{
 		Name:     fmt.Sprintf("%v", d.Get("name")),
 		Domain:   fmt.Sprintf("%v", d.Get("domain")),
-		Type:     fmt.Sprintf("%v", d.Get("type")),
+	name := fmt.Sprintf("%v", d.Get("name"))
 		Content:  fmt.Sprintf("%v", d.Get("record")),
-		Priority: fmt.Sprintf("%v", d.Get("priority")),
+	domainRecord := helper.ConstructFqdn(name, domain)
 	}
 
 	client := dns.New(conf.Client)

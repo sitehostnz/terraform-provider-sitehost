@@ -3,6 +3,8 @@ package db
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/sitehostnz/gosh/pkg/api/job"
 	"strings"
 
@@ -36,9 +38,9 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	}
 	client := db.New(conf.Client)
 
-	serverName := d.Get("server_name").(string)
-	mysqlHost := d.Get("mysql_host").(string)
-	database := d.Get("name").(string)
+	serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
+	database := fmt.Sprintf("%v", d.Get("name"))
 
 	response, err := client.Get(
 		ctx,
@@ -66,12 +68,12 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 	client := db.New(conf.Client)
 
-	serverName := d.Get("server_name").(string)
-	mysqlHost := d.Get("mysql_host").(string)
-	database := d.Get("name").(string)
-	container := d.Get("backup_container").(string)
+	serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
+	database := fmt.Sprintf("%v", d.Get("name"))
+	container := fmt.Sprintf("%v", d.Get("backup_container"))
 
-	jobResponse, err := client.Add(
+	response, err := client.Add(
 		ctx,
 		db.AddRequest{
 			ServerName: serverName,
@@ -86,7 +88,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, mysqlHost, database))
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: jobResponse.Return.JobID, Type: "scheduler"}); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -101,10 +103,10 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 	client := db.New(conf.Client)
 
-	serverName := d.Get("server_name").(string)
-	mysqlHost := d.Get("mysql_host").(string)
-	database := d.Get("name").(string)
-	container := d.Get("backup_container").(string)
+	serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
+	database := fmt.Sprintf("%v", d.Get("name"))
+	container := fmt.Sprintf("%v", d.Get("backup_container"))
 
 	_, err := client.Update(
 		ctx,
@@ -130,11 +132,11 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 	client := db.New(conf.Client)
 
-	serverName := d.Get("server_name").(string)
-	mysqlHost := d.Get("mysql_host").(string)
-	database := d.Get("name").(string)
+	serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
+	database := fmt.Sprintf("%v", d.Get("name"))
 
-	jobResponse, err := client.Delete(
+	response, err := client.Delete(
 		ctx,
 		db.DeleteRequest{
 			ServerName: serverName,
@@ -146,7 +148,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("error removing db: server %s, name %s, database %s, %s", serverName, mysqlHost, database, err)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: jobResponse.Return.JobID, Type: "scheduler"}); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
 		return diag.FromErr(err)
 	}
 

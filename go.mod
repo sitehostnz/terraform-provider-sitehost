@@ -9,6 +9,7 @@ require (
 	github.com/ory/go-acc v0.2.8
 	github.com/sitehostnz/gosh v0.3.2
 	gopkg.in/yaml.v3 v3.0.1
+
 )
 
 require (

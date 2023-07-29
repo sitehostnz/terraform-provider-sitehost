@@ -3,6 +3,8 @@ package environment
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/sitehostnz/gosh/pkg/api/job"
 	"strings"
 
@@ -36,9 +38,9 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	serverName := d.Get("server_name").(string)
-	project := d.Get("project").(string)
-	service := d.Get("service").(string)
+	serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	project := fmt.Sprintf("%v", d.Get("project"))
+	service := fmt.Sprintf("%v", d.Get("service"))
 
 	if service == "" {
 		service = project
@@ -71,9 +73,9 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	serverName := d.Get("server_name").(string)
-	project := d.Get("project").(string)
-	service := d.Get("service").(string)
+	serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	project := fmt.Sprintf("%v", d.Get("project"))
+	service := fmt.Sprintf("%v", d.Get("service"))
 
 	if service == "" {
 		service = project
@@ -86,7 +88,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 
 	client := environment.New(conf.Client)
-	jobResponse, err := client.Update(
+	response, err := client.Update(
 		ctx,
 		environment.UpdateRequest{
 			ServerName:           serverName,
@@ -101,7 +103,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, project, service))
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: jobResponse.Return.JobID, Type: "scheduler"}); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
 
 		return diag.FromErr(err)
 	}

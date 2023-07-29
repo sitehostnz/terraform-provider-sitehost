@@ -4,19 +4,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// stackDataSourceSchema is the schema with values for a cloud stack resource.
+// stackDataSourceSchema returns a schema with the function to read a stack resource.
 func stackDataSourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name": {
 			Type:        schema.TypeString,
 			Required:    true,
-			Description: "The stack name",
+			Description: "The Stack name",
 		},
 
 		"label": {
 			Type:        schema.TypeString,
 			Computed:    true,
-			Description: "The stack label",
+			Description: "The Stack label",
 		},
 
 		// this is a create option, and is reflected in the docker file
@@ -55,10 +55,12 @@ func stackDataSourceSchema() map[string]*schema.Schema {
 				Type: schema.TypeString,
 			},
 		},
+
 		"image": {
 			Computed: true,
 			Type:     schema.TypeString,
 		},
+
 		"docker_file": {
 			Computed:    true,
 			Type:        schema.TypeString,
@@ -99,6 +101,11 @@ func stackDataSourceSchema() map[string]*schema.Schema {
 			Computed:    true,
 			Type:        schema.TypeString,
 			Description: "The server IP address",
+		},
+		"server_id": {
+			Computed:    true,
+			Type:        schema.TypeString,
+			Description: "The Server id where the stack lives",
 		},
 	}
 }
