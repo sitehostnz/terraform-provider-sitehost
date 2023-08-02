@@ -3,8 +3,9 @@ package environment
 import (
 	"context"
 	"fmt"
-	"github.com/sitehostnz/gosh/pkg/api/job"
 	"strings"
+
+	"github.com/sitehostnz/gosh/pkg/api/job"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -36,9 +37,9 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	serverName := d.Get("server_name").(string)
-	project := d.Get("project").(string)
-	service := d.Get("service").(string)
+	serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	project := fmt.Sprintf("%v", d.Get("project"))
+	service := fmt.Sprintf("%v", d.Get("service"))
 
 	if service == "" {
 		service = project
@@ -71,22 +72,37 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	serverName := d.Get("server_name").(string)
-	project := d.Get("project").(string)
-	service := d.Get("service").(string)
+	serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	project := fmt.Sprintf("%v", d.Get("project"))
+	service := fmt.Sprintf("%v", d.Get("service"))
 
 	if service == "" {
 		service = project
 	}
 
-	settings := d.Get("settings").(map[string]interface{})
 	environmentVariables := []models.EnvironmentVariable{}
-	for k, v := range settings {
-		environmentVariables = append(environmentVariables, models.EnvironmentVariable{Name: k, Content: v.(string)})
+	if d.HasChange("settings") {
+		old, new := d.GetChange("settings")
+
+		// additions
+		for k, v := range new.(map[string]interface{}) {
+			ev := models.EnvironmentVariable{Name: k, Content: fmt.Sprintf("%v", v)}
+			if _, exists := old.(map[string]interface{})[k]; !exists {
+				environmentVariables = append(environmentVariables, ev)
+			}
+		}
+
+		// removals
+		for k, _ := range old.(map[string]interface{}) {
+			ev := models.EnvironmentVariable{Name: k, Content: ""}
+			if _, exists := new.(map[string]interface{})[k]; !exists {
+				environmentVariables = append(environmentVariables, ev)
+			}
+		}
 	}
 
 	client := environment.New(conf.Client)
-	jobResponse, err := client.Update(
+	response, err := client.Update(
 		ctx,
 		environment.UpdateRequest{
 			ServerName:           serverName,
@@ -101,7 +117,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, project, service))
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: jobResponse.Return.JobID, Type: "scheduler"}); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
 
 		return diag.FromErr(err)
 	}
