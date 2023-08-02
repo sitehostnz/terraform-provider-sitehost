@@ -2,10 +2,10 @@ name: Dev Release
 
 on:
   workflow_dispatch:
-  inputs:
-    replaceMod:
-        description: 'Replace go.mod'
-        required: false
+    inputs:
+      replaceMod:
+          description: 'Replace go.mod'
+          required: false
 
 jobs:
   releaser:
