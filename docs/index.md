@@ -19,7 +19,7 @@ Use the navigation to the left to read about the available resources.
 terraform {
   required_providers {
     sitehost = {
-      source = "sitehost/sitehost"
+      source = "sitehostnz/sitehost"
       version = "~> 1.0"
     }
   }
