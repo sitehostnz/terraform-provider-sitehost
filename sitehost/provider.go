@@ -12,6 +12,7 @@ import (
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/info"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server"
+	sshkey "github.com/sitehostnz/terraform-provider-sitehost/sitehost/ssh_key"
 )
 
 // New returns a schema.Provider for SiteHost.
@@ -37,15 +38,17 @@ func New(version string) func() *schema.Provider {
 				},
 			},
 			DataSourcesMap: map[string]*schema.Resource{
-				"sitehost_server": server.DataSource(),
-				"sitehost_api":    info.DataSource(),
-				"sitehost_stack":  stack.DataSource(),
+				"sitehost_server":  server.DataSource(),
+				"sitehost_api":     info.DataSource(),
+				"sitehost_stack":   stack.DataSource(),
+				"sitehost_ssh_key": sshkey.DataSource(),
 				// "sitehost_stack_database": database.DataSource(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
 				"sitehost_server":     server.Resource(),
 				"sitehost_dns_zone":   dns.ZoneResource(),
 				"sitehost_dns_record": dns.RecordResource(),
+				"sitehost_ssh_key":    sshkey.Resource(),
 			},
 		}
 

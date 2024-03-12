@@ -672,8 +672,8 @@ github.com/sirupsen/logrus v1.4.2/go.mod h1:tLMulIdttU9McNUspp0xgXVQah82FyeX6Mwd
 github.com/sirupsen/logrus v1.6.0/go.mod h1:7uNnSEd1DgxDLC74fIahvMZmmYsHGZGEOFrfsX/uA88=
 github.com/sirupsen/logrus v1.9.0 h1:trlNQbNUG3OdDrDil03MCb1H2o9nJ1x4/5LYw7byDE0=
 github.com/sirupsen/logrus v1.9.0/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
-github.com/sitehostnz/gosh v0.3.2 h1:BvDMC9YYj4vCLa76DQYNYtICPi2OyAGG1jBpGIYz8Yk=
-github.com/sitehostnz/gosh v0.3.2/go.mod h1:dra8Cc6DfQU2NNzdFf0ObgZhvFdn9Pifq2FiPqEw/ls=
+github.com/sitehostnz/gosh v0.3.4 h1:3uUVtNHHyzRg0zpMiYwVhd/UOYmwzGcLN6fb+Bf0Bew=
+github.com/sitehostnz/gosh v0.3.4/go.mod h1:dra8Cc6DfQU2NNzdFf0ObgZhvFdn9Pifq2FiPqEw/ls=
 github.com/sivchari/containedctx v1.0.2 h1:0hLQKpgC53OVF1VT7CeoFHk9YKstur1XOgfYIc1yrHI=
 github.com/sivchari/containedctx v1.0.2/go.mod h1:PwZOeqm4/DLoJOqMSIJs3aKqXRX4YO+uXww087KZ7Bw=
 github.com/sivchari/nosnakecase v1.7.0 h1:7QkpWIRMe8x25gckkFd2A5Pi6Ymo0qgr4JrhGt95do8=
