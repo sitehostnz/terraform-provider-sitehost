@@ -7,7 +7,7 @@ require (
 	github.com/hashicorp/terraform-plugin-docs v0.9.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.15.0
 	github.com/ory/go-acc v0.2.8
-	github.com/sitehostnz/gosh v0.3.2
+	github.com/sitehostnz/gosh v0.3.4
 )
 
 require (
