@@ -133,6 +133,10 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		return updateLabel(client, d)
 	}
 
+	if d.HasChange("security_groups") {
+		return updateFirewall(client, d)
+	}
+
 	return readResource(ctx, d, meta)
 }
 
@@ -173,6 +177,23 @@ func updateLabel(client *server.Client, d *schema.ResourceData) diag.Diagnostics
 	res, err := client.Update(context.Background(), server.UpdateRequest{
 		Name:  d.Id(),
 		Label: fmt.Sprint(d.Get("label")),
+	})
+	if err != nil {
+		return diag.Errorf("Error updating server: %s", err)
+	}
+
+	if !res.Status {
+		return diag.Errorf("Error updating server: %s", res.Msg)
+	}
+
+	return nil
+}
+
+// updateFirewall is a function to update the firewall of a server.
+func updateFirewall(client *server.Client, d *schema.ResourceData) diag.Diagnostics {
+	res, err := client.UpdateFirewall(context.Background(), server.UpdateFirewallRequest{
+		ServerName:     d.Id(),
+		SecurityGroups: d.Get("security_groups").([]string),
 	})
 	if err != nil {
 		return diag.Errorf("Error updating server: %s", err)
