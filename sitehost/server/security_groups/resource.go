@@ -24,6 +24,30 @@ func Resource() *schema.Resource {
 	}
 }
 
+// createResource is a function to create a new security group.
+func createResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	conf, ok := meta.(*helper.CombinedConfig)
+	if !ok {
+		return diag.Errorf("failed to convert meta object")
+	}
+
+	client := securitygroups.New(conf.Client)
+
+	opts := securitygroups.AddRequest{
+		Label: fmt.Sprint(d.Get("label")),
+	}
+
+	res, err := client.Add(ctx, opts)
+	if err != nil {
+		return diag.Errorf("Error creating security group: %s", err)
+	}
+
+	if !res.Status {
+		return diag.Errorf("Error creating server: %s", res.Msg)
+	}
+
+	return nil
+}
 
 // updateResource is a function to update a security group.
 func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
