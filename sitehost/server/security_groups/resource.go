@@ -15,6 +15,7 @@ import (
 func Resource() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: createResource,
+		ReadContext:   readResource,
 		UpdateContext: updateResource,
 		DeleteContext: deleteResource,
 		Importer: &schema.ResourceImporter{
@@ -46,6 +47,14 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		return diag.Errorf("Error creating server: %s", res.Msg)
 	}
 
+	// Set data
+	// d.SetId(res.Return.Name)
+	// if err := d.Set("name", res.Return.Name); err != nil {
+	// 	return diag.FromErr(err)
+	// }
+
+	log.Printf("[INFO] Security Group Name: %s", d.Id())
+
 	return nil
 }
 
@@ -59,23 +68,21 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	client := securitygroups.New(conf.Client)
 
 	// Only process updates if label or rules have changed
-	if !d.HasChange("label") && !d.HasChange("rules") {
+	if !d.HasChange("label") && !d.HasChange("rules_in") && !d.HasChange("rules_out") {
 		return nil
-	}
-
-	// Get the rules from the schema
-	rulesRaw, ok := d.Get("rules").(map[string]interface{})
-	if !ok {
-		return diag.Errorf("failed to get rules from schema")
 	}
 
 	// Process inbound rules
 	var rulesIn []securitygroups.RuleIn
-	if inRulesRaw, ok := rulesRaw["in"].([]interface{}); ok {
+	if inRulesRaw, ok := d.Get("rules_in").([]interface{}); ok {
 		for _, ruleRaw := range inRulesRaw {
 			rule := ruleRaw.(map[string]interface{})
+			enabled := true
+			if e, ok := rule["enabled"].(bool); ok {
+				enabled = e
+			}
 			rulesIn = append(rulesIn, securitygroups.RuleIn{
-				Enabled:         rule["enabled"].(bool),
+				Enabled:         enabled,
 				Action:          rule["action"].(string),
 				Protocol:        rule["protocol"].(string),
 				SourceIP:        rule["src_ip"].(string),
@@ -86,11 +93,15 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 
 	// Process outbound rules
 	var rulesOut []securitygroups.RuleOut
-	if outRulesRaw, ok := rulesRaw["out"].([]interface{}); ok {
+	if outRulesRaw, ok := d.Get("rules_out").([]interface{}); ok {
 		for _, ruleRaw := range outRulesRaw {
 			rule := ruleRaw.(map[string]interface{})
+			enabled := true
+			if e, ok := rule["enabled"].(bool); ok {
+				enabled = e
+			}
 			rulesOut = append(rulesOut, securitygroups.RuleOut{
-				Enabled:         rule["enabled"].(bool),
+				Enabled:         enabled,
 				Action:          rule["action"].(string),
 				Protocol:        rule["protocol"].(string),
 				DestinationIP:   rule["dest_ip"].(string),
@@ -139,6 +150,62 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 
 	if !resp.Status {
 		return diag.Errorf("Error deleting security group: %s", resp.Msg)
+	}
+
+	return nil
+}
+
+// readResource is a function to read a security group.
+func readResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	conf, ok := meta.(*helper.CombinedConfig)
+	if !ok {
+		return diag.Errorf("failed to convert meta object")
+	}
+
+	client := securitygroups.New(conf.Client)
+	resp, err := client.Get(ctx, securitygroups.GetRequest{
+		Name: d.Id(),
+	})
+	if err != nil {
+		return diag.Errorf("Error reading security group: %s", err)
+	}
+
+	if !resp.Status {
+		return diag.Errorf("Error reading security group: %s", resp.Msg)
+	}
+
+	if err := d.Set("label", resp.Return.Label); err != nil {
+		return diag.FromErr(err)
+	}
+
+	// Set inbound rules
+	rulesIn := make([]map[string]interface{}, len(resp.Return.Rules.In))
+	for i, rule := range resp.Return.Rules.In {
+		rulesIn[i] = map[string]interface{}{
+			"enabled":   rule.Enabled,
+			"action":    rule.Action,
+			"protocol":  rule.Protocol,
+			"src_ip":    rule.SrcIP,
+			"dest_port": fmt.Sprint(rule.DestPort),
+		}
+	}
+	if err := d.Set("rules_in", rulesIn); err != nil {
+		return diag.FromErr(err)
+	}
+
+	// Set outbound rules
+	rulesOut := make([]map[string]interface{}, len(resp.Return.Rules.Out))
+	for i, rule := range resp.Return.Rules.Out {
+		rulesOut[i] = map[string]interface{}{
+			"enabled":   rule.Enabled,
+			"action":    rule.Action,
+			"protocol":  rule.Protocol,
+			"dest_ip":   rule.DestIP,
+			"dest_port": fmt.Sprint(rule.DestPort),
+		}
+	}
+	if err := d.Set("rules_out", rulesOut); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil

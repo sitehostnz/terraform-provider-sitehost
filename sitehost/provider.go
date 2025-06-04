@@ -12,6 +12,7 @@ import (
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/info"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server/security_groups"
 	sshkey "github.com/sitehostnz/terraform-provider-sitehost/sitehost/ssh_key"
 )
 
@@ -45,10 +46,11 @@ func New(version string) func() *schema.Provider {
 				// "sitehost_stack_database": database.DataSource(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
-				"sitehost_server":     server.Resource(),
-				"sitehost_dns_zone":   dns.ZoneResource(),
-				"sitehost_dns_record": dns.RecordResource(),
-				"sitehost_ssh_key":    sshkey.Resource(),
+				"sitehost_server":         server.Resource(),
+				"sitehost_dns_zone":       dns.ZoneResource(),
+				"sitehost_dns_record":     dns.RecordResource(),
+				"sitehost_ssh_key":        sshkey.Resource(),
+				"sitehost_security_group": security_groups.Resource(),
 			},
 		}
 
