@@ -9,13 +9,13 @@ import (
 var resourceSchema = map[string]*schema.Schema{
 	"name": {
 		Type:        schema.TypeString,
+		Optional:    true,
 		Computed:    true,
-		ForceNew:    true,
 		Description: "The name of the Security Group.",
 	},
 	"label": {
 		Type:        schema.TypeString,
-		Optional:    true,
+		Required:    true,
 		Description: "The label for the Security Group.",
 	},
 	"rules_in": {

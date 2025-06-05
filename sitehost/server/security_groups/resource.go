@@ -44,14 +44,14 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	}
 
 	if !res.Status {
-		return diag.Errorf("Error creating server: %s", res.Msg)
+		return diag.Errorf("Error creating security group: %s", res.Msg)
 	}
 
 	// Set data
-	// d.SetId(res.Return.Name)
-	// if err := d.Set("name", res.Return.Name); err != nil {
-	// 	return diag.FromErr(err)
-	// }
+	d.SetId(res.Return.Name)
+	if err := d.Set("name", res.Return.Name); err != nil {
+		return diag.FromErr(err)
+	}
 
 	log.Printf("[INFO] Security Group Name: %s", d.Id())
 
@@ -128,7 +128,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		return diag.Errorf("Error updating security group: %s", res.Msg)
 	}
 
-	return nil
+	return readResource(ctx, d, meta)
 }
 
 // deleteResource is a function to delete a security group.
