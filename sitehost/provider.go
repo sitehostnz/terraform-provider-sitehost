@@ -12,7 +12,7 @@ import (
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/info"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server"
-	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server/security_groups"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server/firewall/security_groups"
 	sshkey "github.com/sitehostnz/terraform-provider-sitehost/sitehost/ssh_key"
 )
 

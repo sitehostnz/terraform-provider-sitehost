@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/server"
+	"github.com/sitehostnz/gosh/pkg/api/server/firewall"
 	"github.com/sitehostnz/gosh/pkg/models"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
@@ -134,6 +135,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	}
 
 	if d.HasChange("security_groups") {
+		client := firewall.New(conf.Client)
 		return updateFirewall(client, d)
 	}
 
@@ -190,8 +192,8 @@ func updateLabel(client *server.Client, d *schema.ResourceData) diag.Diagnostics
 }
 
 // updateFirewall is a function to update the firewall of a server.
-func updateFirewall(client *server.Client, d *schema.ResourceData) diag.Diagnostics {
-	res, err := client.UpdateFirewall(context.Background(), server.UpdateFirewallRequest{
+func updateFirewall(client *firewall.Client, d *schema.ResourceData) diag.Diagnostics {
+	res, err := client.Update(context.Background(), firewall.UpdateRequest{
 		ServerName:     d.Id(),
 		SecurityGroups: d.Get("security_groups").([]string),
 	})
