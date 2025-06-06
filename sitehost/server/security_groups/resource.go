@@ -55,6 +55,12 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 
 	log.Printf("[INFO] Security Group Name: %s", d.Id())
 
+	if d.Get("rules_in") != nil || d.Get("rules_out") != nil {
+		if err := updateResource(ctx, d, meta); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -66,11 +72,6 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	}
 
 	client := securitygroups.New(conf.Client)
-
-	// Only process updates if label or rules have changed
-	if !d.HasChange("label") && !d.HasChange("rules_in") && !d.HasChange("rules_out") {
-		return nil
-	}
 
 	// Process inbound rules
 	var rulesIn []securitygroups.RuleIn
