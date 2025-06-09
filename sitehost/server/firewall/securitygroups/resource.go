@@ -1,4 +1,4 @@
-package security_groups
+package securitygroups
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/sitehostnz/gosh/pkg/api/server/firewall/security_groups"
+	"github.com/sitehostnz/gosh/pkg/api/server/firewall/securitygroups"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
@@ -32,9 +32,9 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	client := security_groups.New(conf.Client)
+	client := securitygroups.New(conf.Client)
 
-	opts := security_groups.AddRequest{
+	opts := securitygroups.AddRequest{
 		Label: fmt.Sprint(d.Get("label")),
 	}
 
@@ -71,11 +71,11 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	client := security_groups.New(conf.Client)
+	client := securitygroups.New(conf.Client)
 
-	opts := security_groups.UpdateRequest{
+	opts := securitygroups.UpdateRequest{
 		Name: d.Id(),
-		Params: security_groups.ParamsOptions{
+		Params: securitygroups.ParamsOptions{
 			Label:    fmt.Sprint(d.Get("label")),
 			RulesIn:  processRules(d.Get("rules_in"), "in"),
 			RulesOut: processRules(d.Get("rules_out"), "out"),
@@ -95,8 +95,8 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 }
 
 // processRules processes the rules for a security group.
-func processRules(rulesRaw interface{}, direction string) []security_groups.UpdateRequestRule {
-	var rules []security_groups.UpdateRequestRule
+func processRules(rulesRaw interface{}, direction string) []securitygroups.UpdateRequestRule {
+	var rules []securitygroups.UpdateRequestRule
 	for _, ruleRaw := range rulesRaw.([]interface{}) {
 		rule := ruleRaw.(map[string]interface{})
 		enabled := true
@@ -109,7 +109,7 @@ func processRules(rulesRaw interface{}, direction string) []security_groups.Upda
 		} else {
 			ip = rule["dest_ip"].(string)
 		}
-		rules = append(rules, security_groups.UpdateRequestRule{
+		rules = append(rules, securitygroups.UpdateRequestRule{
 			Enabled:         enabled,
 			IP:              ip,
 			Action:          rule["action"].(string),
@@ -127,9 +127,9 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	client := security_groups.New(conf.Client)
+	client := securitygroups.New(conf.Client)
 
-	resp, err := client.Delete(context.Background(), security_groups.DeleteRequest{
+	resp, err := client.Delete(context.Background(), securitygroups.DeleteRequest{
 		Name: d.Id(),
 	})
 
@@ -151,8 +151,8 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Di
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	client := security_groups.New(conf.Client)
-	resp, err := client.Get(ctx, security_groups.GetRequest{
+	client := securitygroups.New(conf.Client)
+	resp, err := client.Get(ctx, securitygroups.GetRequest{
 		Name: d.Id(),
 	})
 	if err != nil {
@@ -181,7 +181,7 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Di
 }
 
 // readRules reads the rules for a security group.
-func readRules(d *schema.ResourceData, rulesRaw []security_groups.Rule, direction string) diag.Diagnostics {
+func readRules(d *schema.ResourceData, rulesRaw []securitygroups.Rule, direction string) diag.Diagnostics {
 	rules := make([]map[string]interface{}, len(rulesRaw))
 	for i, ruleRaw := range rulesRaw {
 		rule := map[string]interface{}{

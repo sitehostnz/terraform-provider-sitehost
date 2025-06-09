@@ -1,4 +1,4 @@
-package security_groups
+package securitygroups
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"

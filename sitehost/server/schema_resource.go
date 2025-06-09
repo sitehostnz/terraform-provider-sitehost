@@ -41,7 +41,7 @@ var resourceSchema = map[string]*schema.Schema{
 		Required:    true,
 		Description: "The product code of the server to be deployed, determining the price and size.",
 	},
-	"security_groups": {
+	"securitygroups": {
 		Type:        schema.TypeList,
 		Elem:        &schema.Schema{Type: schema.TypeString},
 		Optional:    true,
