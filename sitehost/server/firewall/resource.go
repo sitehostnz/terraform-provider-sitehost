@@ -1,3 +1,4 @@
+// Package firewall provides the functions to create a Firewall resource via SiteHost API.
 package firewall
 
 import (
@@ -43,7 +44,9 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Di
 	for i, group := range resp.Return {
 		groups[i] = group.Group
 	}
-	d.Set("groups", groups)
+	if err := d.Set("groups", groups); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -57,11 +60,17 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 
 	client := firewall.New(conf.Client)
 
-	serverName := d.Get("server").(string)
-	list := d.Get("groups").([]interface{})
-	groups := make([]string, len(list))
-	for i, v := range list {
-		groups[i] = v.(string)
+	serverName, ok := d.Get("server").(string)
+	if !ok {
+		return diag.Errorf("failed to convert server name to string")
+	}
+	list, ok := d.Get("groups").([]interface{})
+	if !ok {
+		return diag.Errorf("failed to convert groups to []interface{}")
+	}
+	groups := make([]string, 0)
+	for _, v := range list {
+		groups = append(groups, v.(string))
 	}
 
 	diags := updateFirewallGroups(client, serverName, groups)
@@ -81,7 +90,11 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 
 	client := firewall.New(conf.Client)
 
-	serverName := d.Get("server").(string)
+	serverName, ok := d.Get("server").(string)
+	if !ok {
+		return diag.Errorf("failed to convert server name to string")
+	}
+
 	diags := updateFirewallGroups(client, serverName, []string{})
 	if diags != nil {
 		return diags

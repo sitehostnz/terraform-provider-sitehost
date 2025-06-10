@@ -1,3 +1,4 @@
+// Package securitygroups provides the functions to create a Security Group resource via SiteHost API.
 package securitygroups
 
 import (
@@ -96,25 +97,36 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 
 // processRules processes the rules for a security group.
 func processRules(rulesRaw interface{}, direction string) []securitygroups.UpdateRequestRule {
-	var rules []securitygroups.UpdateRequestRule
-	for _, ruleRaw := range rulesRaw.([]interface{}) {
-		rule := ruleRaw.(map[string]interface{})
+	rules := make([]securitygroups.UpdateRequestRule, 0)
+
+	rulesSlice, ok := rulesRaw.([]interface{})
+	if !ok {
+		return rules
+	}
+
+	for _, ruleRaw := range rulesSlice {
+		ruleMap, ok := ruleRaw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
 		enabled := true
-		if e, ok := rule["enabled"].(bool); ok {
+		if e, ok := ruleMap["enabled"].(bool); ok {
 			enabled = e
 		}
 		var ip string
 		if direction == "in" {
-			ip = rule["src_ip"].(string)
+			ip = fmt.Sprint(ruleMap["src_ip"])
 		} else {
-			ip = rule["dest_ip"].(string)
+			ip = fmt.Sprint(ruleMap["dest_ip"])
 		}
+
 		rules = append(rules, securitygroups.UpdateRequestRule{
 			Enabled:         enabled,
 			IP:              ip,
-			Action:          rule["action"].(string),
-			Protocol:        rule["protocol"].(string),
-			DestinationPort: rule["dest_port"].(string),
+			Action:          fmt.Sprint(ruleMap["action"]),
+			Protocol:        fmt.Sprint(ruleMap["protocol"]),
+			DestinationPort: fmt.Sprint(ruleMap["dest_port"]),
 		})
 	}
 	return rules
