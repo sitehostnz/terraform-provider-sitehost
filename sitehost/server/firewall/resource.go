@@ -87,6 +87,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	return nil
 }
 
+// deleteResource is a function to clear the firewall of a server.
 func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -114,6 +115,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	return nil
 }
 
+// updateFirewallGroups is a function to update the firewall security groups of a server.
 func updateFirewallGroups(ctx context.Context, client *firewall.Client, serverName string, groups []string) (firewall.UpdateResponse, diag.Diagnostics) {
 	res, err := client.Update(ctx, firewall.UpdateRequest{
 		ServerName:     serverName,
