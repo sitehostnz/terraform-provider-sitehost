@@ -73,7 +73,6 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	}
 
 	client := securitygroups.New(conf.Client)
-
 	opts := securitygroups.UpdateRequest{
 		Name: d.Id(),
 		Params: securitygroups.ParamsOptions{
@@ -92,13 +91,16 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		return diag.Errorf("Error updating security group: %s", res.Msg)
 	}
 
+	if err := helper.WaitForAction(conf.Client, fmt.Sprint(res.Return.Job.ID), res.Return.Job.Type); err != nil {
+		return diag.FromErr(err)
+	}
+
 	return readResource(ctx, d, meta)
 }
 
 // processRules processes the rules for a security group.
 func processRules(rulesRaw interface{}, direction string) []securitygroups.UpdateRequestRule {
 	rules := make([]securitygroups.UpdateRequestRule, 0)
-
 	rulesSlice, ok := rulesRaw.([]interface{})
 	if !ok {
 		return rules
@@ -114,6 +116,7 @@ func processRules(rulesRaw interface{}, direction string) []securitygroups.Updat
 		if e, ok := ruleMap["enabled"].(bool); ok {
 			enabled = e
 		}
+
 		var ip string
 		if direction == "in" {
 			ip = fmt.Sprint(ruleMap["src_ip"])
@@ -144,11 +147,9 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	resp, err := client.Delete(context.Background(), securitygroups.DeleteRequest{
 		Name: d.Id(),
 	})
-
 	if err != nil {
 		return diag.Errorf("Error deleting security group: %s", err)
 	}
-
 	if !resp.Status {
 		return diag.Errorf("Error deleting security group: %s", resp.Msg)
 	}

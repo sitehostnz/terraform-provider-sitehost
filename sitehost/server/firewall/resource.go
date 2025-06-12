@@ -3,6 +3,7 @@ package firewall
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -70,12 +71,16 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	}
 	groups := make([]string, 0)
 	for _, v := range list {
-		groups = append(groups, v.(string))
+		groups = append(groups, fmt.Sprint(v))
 	}
 
-	diags := updateFirewallGroups(client, serverName, groups)
+	res, diags := updateFirewallGroups(client, serverName, groups)
 	if diags != nil {
 		return diags
+	}
+
+	if err := helper.WaitForAction(conf.Client, fmt.Sprint(res.Return.Job.ID), fmt.Sprint(res.Return.Job.Type)); err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.SetId(serverName)
@@ -95,9 +100,13 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		return diag.Errorf("failed to convert server name to string")
 	}
 
-	diags := updateFirewallGroups(client, serverName, []string{})
+	res, diags := updateFirewallGroups(client, serverName, []string{})
 	if diags != nil {
 		return diags
+	}
+
+	if err := helper.WaitForAction(conf.Client, fmt.Sprint(res.Return.Job.ID), fmt.Sprint(res.Return.Job.Type)); err != nil {
+		return diag.FromErr(err)
 	}
 
 	// Clear the ID when the resource is deleted
@@ -105,18 +114,18 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	return nil
 }
 
-func updateFirewallGroups(client *firewall.Client, serverName string, groups []string) diag.Diagnostics {
+func updateFirewallGroups(client *firewall.Client, serverName string, groups []string) (firewall.UpdateResponse, diag.Diagnostics) {
 	res, err := client.Update(context.Background(), firewall.UpdateRequest{
 		ServerName:     serverName,
 		SecurityGroups: groups,
 	})
 	if err != nil {
-		return diag.Errorf("Error updating server: %s", err)
+		return res, diag.Errorf("Error updating server: %s", err)
 	}
 
 	if !res.Status {
-		return diag.Errorf("Error updating server: %s", res.Msg)
+		return res, diag.Errorf("Error updating server: %s", res.Msg)
 	}
 
-	return nil
+	return res, nil
 }
