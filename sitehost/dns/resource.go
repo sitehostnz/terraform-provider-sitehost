@@ -150,7 +150,10 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.Errorf("Error creating DNS record: %s", resp.Msg)
 	}
 
-	record, err := client.GetRecordWithRecord(ctx, domainRecord)
+	record, err := client.GetRecord(ctx, dns.RecordRequest{
+		ID:         resp.Return.ID,
+		DomainName: domainRecord.Domain,
+	})
 	if err != nil {
 		return diag.Errorf("Error creating DNS record: %s", err)
 	}
@@ -255,7 +258,7 @@ func updateRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 // importRecordResource is a function to import a DNS Record.
-func importRecordResource(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func importRecordResource(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	if strings.Contains(d.Id(), ",") {
 		s := strings.Split(d.Id(), ",")
 

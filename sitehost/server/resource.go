@@ -80,7 +80,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	}
 
 	// wait for "Completed" status
-	if err := helper.WaitForAction(conf.Client, fmt.Sprint(res.Return.Job.ID), fmt.Sprint(res.Return.Job.Type)); err != nil {
+	if err := helper.WaitForAction(conf.Client, fmt.Sprint(res.Return.Job.ID), res.Return.Job.Type); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -90,7 +90,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 }
 
 // readResource is a function to read a new server.
-func readResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func readResource(_ context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
 		return diag.Errorf("failed to convert meta object")
@@ -186,7 +186,7 @@ func updateLabel(client *server.Client, d *schema.ResourceData) diag.Diagnostics
 }
 
 // deleteResource is a function to delete a server.
-func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func deleteResource(_ context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
 		return diag.Errorf("failed to convert meta object")

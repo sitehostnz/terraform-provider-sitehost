@@ -79,7 +79,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		return diags
 	}
 
-	if err := helper.WaitForAction(conf.Client, fmt.Sprint(res.Return.Job.ID), fmt.Sprint(res.Return.Job.Type)); err != nil {
+	if err := helper.WaitForAction(conf.Client, fmt.Sprint(res.Return.Job.ID), res.Return.Job.Type); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -105,7 +105,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		return diags
 	}
 
-	if err := helper.WaitForAction(conf.Client, fmt.Sprint(res.Return.Job.ID), fmt.Sprint(res.Return.Job.Type)); err != nil {
+	if err := helper.WaitForAction(conf.Client, fmt.Sprint(res.Return.Job.ID), res.Return.Job.Type); err != nil {
 		return diag.FromErr(err)
 	}
 
