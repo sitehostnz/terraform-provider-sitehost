@@ -35,10 +35,15 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 
 	client := sshkey.New(conf.Client)
 
+	customImageAccess, ok := d.Get("custom_image_access").(bool)
+	if !ok {
+		return diag.Errorf("failed to convert custom_image_access to bool")
+	}
+
 	opts := sshkey.CreateRequest{
 		Label:             fmt.Sprint(d.Get("label")),
 		Content:           fmt.Sprint(d.Get("content")),
-		CustomImageAccess: fmt.Sprint(d.Get("custom_image_access")),
+		CustomImageAccess: customImageAccess,
 	}
 
 	res, err := client.Create(ctx, opts)
@@ -145,7 +150,7 @@ func updateKey(client *sshkey.Client, d *schema.ResourceData) diag.Diagnostics {
 		ID:                d.Id(),
 		Label:             fmt.Sprint(d.Get("label")),
 		Content:           fmt.Sprint(d.Get("content")),
-		CustomImageAccess: fmt.Sprint(d.Get("custom_image_access")),
+		CustomImageAccess: d.Get("custom_image_access").(bool),
 	})
 	if err != nil {
 		return diag.Errorf("Error updating SSH Key: %s", err)

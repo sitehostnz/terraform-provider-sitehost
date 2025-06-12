@@ -68,7 +68,7 @@ func (c *Config) Client() (*CombinedConfig, diag.Diagnostics) {
 }
 
 // WaitForAction is a function to check the Job status in a refresh function.
-func WaitForAction(client *api.Client, jobID string) error {
+func WaitForAction(client *api.Client, jobID string, jobType string) error {
 	var (
 		pending   = JobStatusPending
 		target    = JobStatusCompleted
@@ -78,7 +78,7 @@ func WaitForAction(client *api.Client, jobID string) error {
 
 			j, err := svc.Get(ctx, job.GetRequest{
 				JobID: jobID,
-				Type:  "daemon",
+				Type:  jobType,
 			})
 			if err != nil {
 				return nil, "", err
