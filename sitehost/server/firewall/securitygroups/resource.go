@@ -77,8 +77,8 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		Name: d.Id(),
 		Params: securitygroups.ParamsOptions{
 			Label:    fmt.Sprint(d.Get("label")),
-			RulesIn:  processRules(d.Get("rules_in"), in),
-			RulesOut: processRules(d.Get("rules_out"), out),
+			RulesIn:  processRules(d.Get("rules_in"), ruleIn),
+			RulesOut: processRules(d.Get("rules_out"), ruleOut),
 		},
 	}
 
@@ -119,9 +119,9 @@ func processRules(rulesRaw interface{}, direction string) []securitygroups.Updat
 
 		var ip string
 		switch direction {
-		case in:
+		case ruleIn:
 			ip = fmt.Sprint(ruleMap["src_ip"])
-		case out:
+		case ruleOut:
 			ip = fmt.Sprint(ruleMap["dest_ip"])
 		}
 
@@ -182,12 +182,12 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Di
 	}
 
 	// Set inbound rules
-	if err := readRules(d, resp.Return.Rules.In, in); err != nil {
+	if err := readRules(d, resp.Return.Rules.In, ruleIn); err != nil {
 		return err
 	}
 
 	// Set outbound rules
-	if err := readRules(d, resp.Return.Rules.Out, out); err != nil {
+	if err := readRules(d, resp.Return.Rules.Out, ruleOut); err != nil {
 		return err
 	}
 
@@ -205,9 +205,9 @@ func readRules(d *schema.ResourceData, rulesRaw []securitygroups.Rule, direction
 			"dest_port": fmt.Sprint(ruleRaw.DestPort),
 		}
 		switch direction {
-		case in:
+		case ruleIn:
 			rule["src_ip"] = ruleRaw.SrcIP
-		case out:
+		case ruleOut:
 			rule["dest_ip"] = ruleRaw.DestIP
 		}
 		rules[i] = rule

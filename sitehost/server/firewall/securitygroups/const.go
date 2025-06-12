@@ -1,6 +1,6 @@
 package securitygroups
 
 const (
-	in  = "in"
-	out = "out"
+	ruleIn  = "in"
+	ruleOut = "out"
 )
