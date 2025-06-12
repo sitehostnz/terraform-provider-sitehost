@@ -144,7 +144,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 
 	client := securitygroups.New(conf.Client)
 
-	resp, err := client.Delete(context.Background(), securitygroups.DeleteRequest{
+	resp, err := client.Delete(ctx, securitygroups.DeleteRequest{
 		Name: d.Id(),
 	})
 	if err != nil {

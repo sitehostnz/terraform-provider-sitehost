@@ -74,7 +74,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		groups = append(groups, fmt.Sprint(v))
 	}
 
-	res, diags := updateFirewallGroups(client, serverName, groups)
+	res, diags := updateFirewallGroups(ctx, client, serverName, groups)
 	if diags != nil {
 		return diags
 	}
@@ -100,7 +100,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		return diag.Errorf("failed to convert server name to string")
 	}
 
-	res, diags := updateFirewallGroups(client, serverName, []string{})
+	res, diags := updateFirewallGroups(ctx, client, serverName, []string{})
 	if diags != nil {
 		return diags
 	}
@@ -114,8 +114,8 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	return nil
 }
 
-func updateFirewallGroups(client *firewall.Client, serverName string, groups []string) (firewall.UpdateResponse, diag.Diagnostics) {
-	res, err := client.Update(context.Background(), firewall.UpdateRequest{
+func updateFirewallGroups(ctx context.Context, client *firewall.Client, serverName string, groups []string) (firewall.UpdateResponse, diag.Diagnostics) {
+	res, err := client.Update(ctx, firewall.UpdateRequest{
 		ServerName:     serverName,
 		SecurityGroups: groups,
 	})
