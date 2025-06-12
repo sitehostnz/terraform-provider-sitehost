@@ -18,9 +18,9 @@ var resourceSchema = map[string]*schema.Schema{
 		Description: "The `content` is the contents of the public key.",
 	},
 	"custom_image_access": {
-		Type:     schema.TypeString,
+		Type:     schema.TypeBool,
 		Optional: true,
-		Default:  "0",
+		Default:  false,
 	},
 	"id": {
 		Type:        schema.TypeString,
